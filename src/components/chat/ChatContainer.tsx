@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Message, BekaResponse, Product } from '@/types/chat';
+import { Message, BekaResponse } from '@/types/chat';
 import { ChatMessage } from './ChatMessage';
 import { ChatInput } from './ChatInput';
-import { Loader2, Leaf } from 'lucide-react';
+import { Loader2, X } from 'lucide-react';
 import { SplitText } from '@/components/ui/SplitText';
 
 const STORAGE_KEY = 'beka-chat-history';
@@ -13,7 +13,11 @@ function generateId(): string {
     return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
 
-export function ChatContainer() {
+interface ChatContainerProps {
+    onClose?: () => void;
+}
+
+export function ChatContainer({ onClose }: ChatContainerProps) {
     const [messages, setMessages] = useState<Message[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -111,29 +115,11 @@ export function ChatContainer() {
         const newHistory = messages.slice(0, messageIndex);
         setMessages(newHistory);
 
-        // Send the new content as if it were a new message
-        // We wait a tick to ensure state update or just call sendMessage which updates state based on 'prev'
-        // Actually, sendMessage uses setMessages(prev => [...prev ...]). 
-        // So we need to ensure setMessages(newHistory) has processed or pass the history. 
-        // But sendMessage relies on 'prev'.
-
-        // Better approach: Update state to newHistory locally, then call sendMessage.
-        // Since React state updates are batched/async, calling sendMessage immediately after setMessages might key off old state 
-        // OR key off the pending state depending on implementation. 
-        // Safest is to explicitly handle it or wait. 
-
-        // However, standard sendMessage just appends. 
-        // So if we setMessages(newHistory), we want the next sendMessage to append to THAT.
-
-        // Let's do this: we can't easily chain state updates like that in one go without being careful.
-        // We can pass an optional 'baseMessages' to sendMessage or just manually do the logic here.
-
-        // Manual logic here to be safe:
+        // Update state to newHistory locally, then call sendMessage logic
         setError(null);
         setIsLoading(true);
 
-        // 1. Set history truncated
-        // 2. Add new user message
+        // Add new user message
         const userMessage: Message = {
             id: generateId(),
             role: 'user',
@@ -185,8 +171,7 @@ export function ChatContainer() {
             <div className="aurora-glow top-[-10%] left-[-10%] opacity-60 animate-pulse pointer-events-none z-0" />
             <div className="aurora-glow bottom-[10%] right-[-5%] w-[500px] h-[100px] opacity-40 pointer-events-none z-0" />
 
-            {/* Header simplified or removed - keeping just a clean space or floating controls if needed */}
-            {/* Header - Fixed Glass Bar with Safe Area */}
+            {/* Header - Absolute Glass Bar */}
             <header className="absolute top-0 left-0 right-0 z-50 px-6 pt-6 pb-3 flex items-center justify-between bg-gradient-to-b from-surface-white/95 via-surface-white/80 to-transparent backdrop-blur-md transition-all duration-300">
                 <div className="flex items-center gap-3">
                     <div className="h-10 bg-surface-white/50 backdrop-blur-md flex items-center justify-center shadow-sm border border-white/40 overflow-hidden rounded-full px-2">
@@ -194,14 +179,24 @@ export function ChatContainer() {
                     </div>
                 </div>
 
-                {messages.length > 0 && (
-                    <button
-                        onClick={clearHistory}
-                        className="text-xs font-medium text-text-secondary hover:text-red-500 bg-surface-white/50 hover:bg-surface-white backdrop-blur-md px-4 py-2 rounded-full transition-all border border-white/40 shadow-sm hover:shadow"
-                    >
-                        Limpar
-                    </button>
-                )}
+                <div className="flex items-center gap-2">
+                    {messages.length > 0 && (
+                        <button
+                            onClick={clearHistory}
+                            className="text-xs font-medium text-text-secondary hover:text-red-500 bg-surface-white/50 hover:bg-surface-white backdrop-blur-md px-4 py-2 rounded-full transition-all border border-white/40 shadow-sm hover:shadow"
+                        >
+                            Limpar
+                        </button>
+                    )}
+                    {onClose && (
+                        <button
+                            onClick={onClose}
+                            className="h-8 w-8 flex items-center justify-center rounded-full bg-surface-white/50 hover:bg-red-500 hover:text-white transition-colors backdrop-blur-md border border-white/40 shadow-sm"
+                        >
+                            <X className="h-5 w-5" />
+                        </button>
+                    )}
+                </div>
             </header>
 
             {/* Messages Container */}
@@ -259,6 +254,13 @@ export function ChatContainer() {
                                 </div>
                             </div>
                         )}
+                    </div>
+                )}
+                {error && (
+                    <div className="flex justify-center p-4">
+                        <div className="bg-red-50 text-red-500 text-xs px-3 py-2 rounded-lg border border-red-100">
+                            {error}
+                        </div>
                     </div>
                 )}
                 <div ref={messagesEndRef} />

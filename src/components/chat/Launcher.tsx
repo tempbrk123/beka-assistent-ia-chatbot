@@ -1,6 +1,6 @@
 'use client';
 
-import { MessageCircle, X } from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -12,27 +12,18 @@ interface LauncherProps {
 
 export function Launcher({ isOpen, onClick, unreadCount = 0 }: LauncherProps) {
     return (
-        <div className="fixed top-4 right-4 z-50 flex flex-col items-end gap-2">
+        <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-2">
             <Button
                 onClick={onClick}
                 size="icon"
                 className={cn(
-                    "h-14 w-14 rounded-full shadow-lg transition-all duration-300 hover:scale-105",
-                    isOpen ? "bg-destructive hover:bg-destructive/90" : "bg-primary hover:bg-primary/90"
+                    "h-14 w-14 rounded-full shadow-lg transition-all duration-300 hover:scale-105 bg-primary hover:bg-primary/90",
+                    isOpen && "opacity-0 scale-0 pointer-events-none"
                 )}
             >
                 <div className="relative flex items-center justify-center">
-                    <X
-                        className={cn(
-                            "absolute h-7 w-7 transition-all duration-300",
-                            isOpen ? "scale-100 rotate-0" : "scale-0 rotate-90"
-                        )}
-                    />
                     <MessageCircle
-                        className={cn(
-                            "absolute h-7 w-7 transition-all duration-300",
-                            isOpen ? "scale-0 -rotate-90" : "scale-100 rotate-0"
-                        )}
+                        className="h-7 w-7"
                     />
                 </div>
 
