@@ -15,6 +15,14 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        if (!BEKA_API_URL || !BEKA_API_TOKEN) {
+            console.error('Configuration Error: Missing BEKA_API_URL or BEKA_API_TOKEN');
+            return NextResponse.json(
+                { error: 'Server configuration error: Missing API credentials' },
+                { status: 500 }
+            );
+        }
+
         console.log('Enviando para API:', { message, url: BEKA_API_URL });
 
         const response = await fetch(BEKA_API_URL, {

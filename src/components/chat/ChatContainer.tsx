@@ -85,7 +85,8 @@ export function ChatContainer({ onClose }: ChatContainerProps) {
             });
 
             if (!response.ok) {
-                throw new Error('Falha ao enviar mensagem');
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || `Erro ${response.status}: Falha ao enviar mensagem`);
             }
 
             const data: BekaResponse = await response.json();
