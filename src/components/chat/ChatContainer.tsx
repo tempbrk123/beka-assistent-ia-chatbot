@@ -50,8 +50,14 @@ export function ChatContainer() {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages, isLoading]);
 
-    const sendMessage = async (content: string) => {
+    const sendMessage = async (content: string, audioBlob?: Blob) => {
         setError(null);
+
+        // Handle Audio URL creation
+        let audioUrl: string | undefined;
+        if (audioBlob) {
+            audioUrl = URL.createObjectURL(audioBlob);
+        }
 
         // Add user message
         const userMessage: Message = {
@@ -59,11 +65,13 @@ export function ChatContainer() {
             role: 'user',
             content,
             timestamp: Date.now(),
+            audioUrl: audioUrl, // Store local audio URL for UI
         };
         setMessages((prev) => [...prev, userMessage]);
         setIsLoading(true);
 
         try {
+            // Send ONLY text to backend
             const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: {
@@ -95,20 +103,91 @@ export function ChatContainer() {
         }
     };
 
+    const handleEditMessage = async (id: string, newContent: string) => {
+        const messageIndex = messages.findIndex((m) => m.id === id);
+        if (messageIndex === -1) return;
+
+        // Keep messages up to the one being edited (exclusive)
+        const newHistory = messages.slice(0, messageIndex);
+        setMessages(newHistory);
+
+        // Send the new content as if it were a new message
+        // We wait a tick to ensure state update or just call sendMessage which updates state based on 'prev'
+        // Actually, sendMessage uses setMessages(prev => [...prev ...]). 
+        // So we need to ensure setMessages(newHistory) has processed or pass the history. 
+        // But sendMessage relies on 'prev'.
+
+        // Better approach: Update state to newHistory locally, then call sendMessage.
+        // Since React state updates are batched/async, calling sendMessage immediately after setMessages might key off old state 
+        // OR key off the pending state depending on implementation. 
+        // Safest is to explicitly handle it or wait. 
+
+        // However, standard sendMessage just appends. 
+        // So if we setMessages(newHistory), we want the next sendMessage to append to THAT.
+
+        // Let's do this: we can't easily chain state updates like that in one go without being careful.
+        // We can pass an optional 'baseMessages' to sendMessage or just manually do the logic here.
+
+        // Manual logic here to be safe:
+        setError(null);
+        setIsLoading(true);
+
+        // 1. Set history truncated
+        // 2. Add new user message
+        const userMessage: Message = {
+            id: generateId(),
+            role: 'user',
+            content: newContent,
+            timestamp: Date.now(),
+        };
+
+        setMessages([...newHistory, userMessage]);
+
+        try {
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message: newContent }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Falha ao enviar mensagem');
+            }
+
+            const data: BekaResponse = await response.json();
+
+            const assistantMessage: Message = {
+                id: generateId(),
+                role: 'assistant',
+                content: data.Beka,
+                timestamp: Date.now(),
+                buttonLabels: data.ButtonLabel,
+            };
+            setMessages(prev => [...prev, assistantMessage]);
+        } catch (e) {
+            console.error('Error sending message:', e);
+            setError('Ocorreu um erro ao enviar sua mensagem. Por favor, tente novamente.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const clearHistory = () => {
         setMessages([]);
         localStorage.removeItem(STORAGE_KEY);
     };
 
     return (
-        <div className="flex flex-col h-[100dvh] relative overflow-hidden bg-background">
+        <div className="flex flex-col h-full relative overflow-hidden bg-background">
             {/* Background Decor - Aurora Glow */}
             <div className="aurora-glow top-[-10%] left-[-10%] opacity-60 animate-pulse pointer-events-none z-0" />
             <div className="aurora-glow bottom-[10%] right-[-5%] w-[500px] h-[100px] opacity-40 pointer-events-none z-0" />
 
             {/* Header simplified or removed - keeping just a clean space or floating controls if needed */}
             {/* Header - Fixed Glass Bar with Safe Area */}
-            <header className="fixed top-0 left-0 right-0 z-50 px-6 pt-[max(1.5rem,env(safe-area-inset-top))] pb-3 flex items-center justify-between bg-gradient-to-b from-surface-white/95 via-surface-white/80 to-transparent backdrop-blur-md transition-all duration-300">
+            <header className="absolute top-0 left-0 right-0 z-50 px-6 pt-6 pb-3 flex items-center justify-between bg-gradient-to-b from-surface-white/95 via-surface-white/80 to-transparent backdrop-blur-md transition-all duration-300">
                 <div className="flex items-center gap-3">
                     <div className="h-10 bg-surface-white/50 backdrop-blur-md flex items-center justify-center shadow-sm border border-white/40 overflow-hidden rounded-full px-2">
                         <img src="/logo_beka_ia.png" alt="Beka" className="h-8 object-contain" />
@@ -168,6 +247,7 @@ export function ChatContainer() {
                                 key={message.id}
                                 message={message}
                                 onButtonClick={sendMessage}
+                                onEdit={handleEditMessage}
                             />
                         ))}
                         {isLoading && (
