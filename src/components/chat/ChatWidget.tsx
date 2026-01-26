@@ -24,7 +24,7 @@ export function ChatWidget() {
                         : "opacity-0 translate-y-4 scale-95 pointer-events-none"
                 )}
             >
-                <div className="h-full w-full rounded-4xl shadow-2xl overflow-hidden border border-border/50 bg-background/95 backdrop-blur-sm">
+                <div className="h-full w-full rounded-4xl shadow-2xl overflow-hidden bg-background/80 backdrop-blur-md">
                     <ChatContainer onClose={() => setIsOpen(false)} />
                 </div>
             </div>

@@ -173,7 +173,7 @@ export function ChatContainer({ onClose }: ChatContainerProps) {
             <div className="aurora-glow bottom-[10%] right-[-5%] w-[500px] h-[100px] opacity-40 pointer-events-none z-0" />
 
             {/* Header - Absolute Glass Bar */}
-            <header className="absolute top-0 left-0 right-0 z-50 px-6 pt-6 pb-3 flex items-center justify-between bg-gradient-to-b from-surface-white/95 via-surface-white/80 to-transparent backdrop-blur-md transition-all duration-300">
+            <header className="absolute top-0 left-0 right-0 z-50 px-6 pt-6 pb-3 flex items-center justify-between from-surface-white/95 via-surface-white/80 to-transparent backdrop-blur-md transition-all duration-300">
                 <div className="flex items-center gap-3">
                     <div className="h-10 bg-surface-white/50 backdrop-blur-md flex items-center justify-center shadow-sm border border-white/40 overflow-hidden rounded-full px-2">
                         <img src="/logo_beka_ia.png" alt="Beka" className="h-8 object-contain" />
