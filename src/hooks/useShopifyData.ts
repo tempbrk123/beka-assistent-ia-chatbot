@@ -45,8 +45,8 @@ export interface ShopifyShop {
 }
 
 export interface BekaAppData {
-    shop?: ShopifyShop;
-    customer?: ShopifyCustomer;
+    shop?: string | ShopifyShop;
+    customer?: ShopifyCustomer & { name?: string };
     cart?: ShopifyCart;
     product?: ShopifyProduct;
 }
@@ -58,7 +58,7 @@ declare global {
     }
 }
 
-const SYNC_ENDPOINT = 'https://n8n.usebrk.com.br/webhook/beka_website_assistent';
+const SYNC_ENDPOINT = '/api/shopify-sync';
 const SESSION_KEY = 'beka_shopify_data_hash';
 
 /**
