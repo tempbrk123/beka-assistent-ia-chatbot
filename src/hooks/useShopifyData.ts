@@ -141,14 +141,31 @@ export function useShopifyData(options: UseShopifyDataOptions = {}): UseShopifyD
     const startTimeRef = useRef(Date.now());
 
     /**
-     * Captura os dados da window
+     * Captura os dados da window (local ou parent quando em iframe)
      */
     const fetchDataFromWindow = useCallback((): BekaAppData | null => {
         // Garantir que estamos no client-side
         if (typeof window === 'undefined') return null;
 
+        // Primeiro, tentar na window atual
         if (window.BekaAppData) {
+            console.log('[BekaShopify] Dados encontrados na window local');
             return window.BekaAppData;
+        }
+
+        // Se estiver em um iframe, tentar buscar da janela pai
+        try {
+            if (window.parent && window.parent !== window) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const parentData = (window.parent as any).BekaAppData;
+                if (parentData) {
+                    console.log('[BekaShopify] Dados encontrados na window.parent');
+                    return parentData;
+                }
+            }
+        } catch (e) {
+            // Erro de cross-origin - não temos acesso à janela pai
+            console.log('[BekaShopify] Não foi possível acessar window.parent (cross-origin)');
         }
 
         return null;
@@ -236,7 +253,36 @@ export function useShopifyData(options: UseShopifyDataOptions = {}): UseShopifyD
 
         startTimeRef.current = Date.now();
 
-        // Tentar capturar dados imediatamente
+        /**
+         * Handler para receber dados via postMessage (quando em iframe)
+         */
+        const handleMessage = (event: MessageEvent) => {
+            // Verificar se é uma mensagem de dados da Shopify
+            if (event.data && event.data.type === 'BEKA_SHOPIFY_DATA' && event.data.payload) {
+                console.log('[BekaShopify] Dados recebidos via postMessage:', event.data.payload);
+
+                const shopifyData = event.data.payload as BekaAppData;
+                setData(shopifyData);
+                setIsLoading(false);
+
+                // Sincronizar automaticamente se habilitado
+                if (autoSync && !syncAttemptedRef.current) {
+                    syncAttemptedRef.current = true;
+                    syncWithBackend(shopifyData);
+                }
+            }
+        };
+
+        // Adicionar listener para postMessage
+        window.addEventListener('message', handleMessage);
+
+        // Solicitar dados ao parent (se estiver em iframe)
+        if (window.parent && window.parent !== window) {
+            console.log('[BekaShopify] Solicitando dados ao parent...');
+            window.parent.postMessage('BEKA_REQUEST_SHOPIFY_DATA', '*');
+        }
+
+        // Tentar capturar dados imediatamente (caso local)
         const initialData = fetchDataFromWindow();
         if (initialData) {
             setData(initialData);
@@ -247,10 +293,12 @@ export function useShopifyData(options: UseShopifyDataOptions = {}): UseShopifyD
                 syncAttemptedRef.current = true;
                 syncWithBackend(initialData);
             }
-            return;
+            return () => {
+                window.removeEventListener('message', handleMessage);
+            };
         }
 
-        // Se não encontrou, fazer polling
+        // Se não encontrou, fazer polling (fallback)
         const interval = setInterval(() => {
             const elapsed = Date.now() - startTimeRef.current;
 
@@ -258,7 +306,7 @@ export function useShopifyData(options: UseShopifyDataOptions = {}): UseShopifyD
             if (elapsed >= maxWaitTime) {
                 clearInterval(interval);
                 setIsLoading(false);
-                console.log('[BekaShopify] Timeout: window.BekaAppData não encontrado');
+                console.log('[BekaShopify] Timeout: dados não encontrados');
                 return;
             }
 
@@ -278,6 +326,7 @@ export function useShopifyData(options: UseShopifyDataOptions = {}): UseShopifyD
 
         return () => {
             clearInterval(interval);
+            window.removeEventListener('message', handleMessage);
         };
     }, [fetchDataFromWindow, syncWithBackend, autoSync, pollInterval, maxWaitTime]);
 

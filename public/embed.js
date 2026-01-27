@@ -33,6 +33,39 @@
 
     document.body.appendChild(iframe);
 
+    /**
+     * Envia os dados da Shopify para o iframe via postMessage
+     */
+    function sendShopifyDataToWidget() {
+        if (window.BekaAppData && iframe.contentWindow) {
+            iframe.contentWindow.postMessage({
+                type: "BEKA_SHOPIFY_DATA",
+                payload: window.BekaAppData
+            }, WIDGET_URL);
+            console.log("[Beka] Dados da Shopify enviados para o widget:", window.BekaAppData);
+        }
+    }
+
+    // Quando o iframe carregar, enviar os dados da Shopify
+    iframe.onload = function () {
+        // Tentar enviar imediatamente
+        sendShopifyDataToWidget();
+
+        // Se BekaAppData ainda não existir, tentar novamente algumas vezes
+        var attempts = 0;
+        var maxAttempts = 10;
+        var interval = setInterval(function () {
+            attempts++;
+            if (window.BekaAppData) {
+                sendShopifyDataToWidget();
+                clearInterval(interval);
+            } else if (attempts >= maxAttempts) {
+                clearInterval(interval);
+                console.log("[Beka] BekaAppData não encontrado após " + maxAttempts + " tentativas");
+            }
+        }, 500);
+    };
+
     // Handle Messages from Widget (Open/Close)
     window.addEventListener("message", function (event) {
         // Security check: ensure message comes from our widget
@@ -48,6 +81,9 @@
             // Shrink back to launcher button size
             iframe.style.width = "100px";
             iframe.style.height = "100px";
+        } else if (event.data === "BEKA_REQUEST_SHOPIFY_DATA") {
+            // Widget is requesting the Shopify data
+            sendShopifyDataToWidget();
         }
     });
 })();
