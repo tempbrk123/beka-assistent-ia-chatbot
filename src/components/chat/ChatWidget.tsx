@@ -4,9 +4,29 @@ import { useState, useEffect } from 'react';
 import { ChatContainer } from '@/components/chat/ChatContainer';
 import { Launcher } from '@/components/chat/Launcher';
 import { cn } from '@/lib/utils';
+import { useShopifyData } from '@/hooks/useShopifyData';
 
 export function ChatWidget() {
     const [isOpen, setIsOpen] = useState(false);
+
+    // Sincronizar dados da Shopify com o backend quando o widget for montado
+    const { data: shopifyData, isSynced, error: syncError } = useShopifyData({
+        autoSync: true,
+        preventDuplicateSync: true,
+    });
+
+    // Log para debug (pode remover em produção)
+    useEffect(() => {
+        if (shopifyData) {
+            console.log('[BekaWidget] Dados Shopify capturados:', shopifyData);
+        }
+        if (isSynced) {
+            console.log('[BekaWidget] Dados sincronizados com backend');
+        }
+        if (syncError) {
+            console.error('[BekaWidget] Erro na sincronização:', syncError);
+        }
+    }, [shopifyData, isSynced, syncError]);
 
     // Notify parent window (host site) when widget opens/closes
     useEffect(() => {
