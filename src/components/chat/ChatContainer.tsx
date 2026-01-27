@@ -5,7 +5,6 @@ import { Message, BekaResponse } from '@/types/chat';
 import { ChatMessage } from './ChatMessage';
 import { ChatInput } from './ChatInput';
 import { Loader2, X } from 'lucide-react';
-import { useShopifyData } from '@/hooks/useShopifyData';
 import { SplitText } from '@/components/ui/SplitText';
 
 const STORAGE_KEY = 'beka-chat-history';
@@ -24,13 +23,6 @@ export function ChatContainer({ onClose }: ChatContainerProps) {
     const [error, setError] = useState<string | null>(null);
     const [isHydrated, setIsHydrated] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
-
-    // Hook para capturar dados da Shopify (se disponível)
-    // O hook automaticamente faz POST para /api/shopify-sync quando os dados existem
-    const shopifyData = useShopifyData({
-        autoSync: true,
-        preventDuplicateSync: true,
-    });
 
     // Load messages from localStorage on mount
     useEffect(() => {
