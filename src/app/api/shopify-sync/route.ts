@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+const BEKA_API_URL = process.env.BEKA_API_URL || 'https://n8n.usebrk.com.br/webhook/beka_website_assistent';
+const BEKA_API_TOKEN = process.env.BEKA_API_TOKEN || '';
+
 /**
  * Endpoint para receber e processar dados da sessão do Shopify
  * Estes dados chegam do hook useShopifyData quando o widget é carregado em uma loja Shopify
+ * e são imediatamente enviados para o n8n
  */
 export async function POST(request: NextRequest) {
     try {
@@ -26,13 +30,38 @@ export async function POST(request: NextRequest) {
             hasProduct: !!data.product,
         });
 
-        // Aqui você pode:
-        // 1. Armazenar os dados em um banco de dados
-        // 2. Enviar para um serviço externo
-        // 3. Criar uma sessão para o usuário
-        // 4. Qualquer outra lógica de negócio necessária
+        // Enviar dados para o n8n
+        if (!BEKA_API_URL || !BEKA_API_TOKEN) {
+            console.error('[ShopifySync] Configuration Error: Missing BEKA_API_URL or BEKA_API_TOKEN');
+            return NextResponse.json(
+                { error: 'Server configuration error: Missing API credentials' },
+                { status: 500 }
+            );
+        }
 
-        // Por enquanto, apenas retornamos sucesso
+        console.log('[ShopifySync] Enviando dados para n8n...');
+
+        const n8nResponse = await fetch(BEKA_API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${BEKA_API_TOKEN}`,
+            },
+            body: JSON.stringify({
+                type: 'shopify_session_init',
+                timestamp,
+                source,
+                shopifyData: data,
+            }),
+        });
+
+        if (!n8nResponse.ok) {
+            console.error('[ShopifySync] n8n retornou erro:', n8nResponse.status);
+            // Não falhar a requisição, apenas logar
+        } else {
+            console.log('[ShopifySync] Dados enviados para n8n com sucesso!');
+        }
+
         return NextResponse.json({
             success: true,
             message: 'Dados da Shopify sincronizados com sucesso',
