@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ChatContainer } from '@/components/chat/ChatContainer';
 import { Launcher } from '@/components/chat/Launcher';
 import { cn } from '@/lib/utils';
@@ -8,25 +8,53 @@ import { useShopifyData } from '@/hooks/useShopifyData';
 
 export function ChatWidget() {
     const [isOpen, setIsOpen] = useState(false);
+    const hasSentToN8n = useRef(false);
 
-    // Sincronizar dados da Shopify com o backend quando o widget for montado
-    const { data: shopifyData, isSynced, error: syncError } = useShopifyData({
-        autoSync: true,
+    // Capturar dados da Shopify (sem autoSync para /api/shopify-sync)
+    const { data: shopifyData, error: syncError } = useShopifyData({
+        autoSync: false,  // Não sincronizar automaticamente
         preventDuplicateSync: true,
     });
 
-    // Log para debug (pode remover em produção)
+    // Log para debug
     useEffect(() => {
         if (shopifyData) {
             console.log('[BekaWidget] Dados Shopify capturados:', shopifyData);
         }
-        if (isSynced) {
-            console.log('[BekaWidget] Dados sincronizados com backend');
-        }
         if (syncError) {
             console.error('[BekaWidget] Erro na sincronização:', syncError);
         }
-    }, [shopifyData, isSynced, syncError]);
+    }, [shopifyData, syncError]);
+
+    // Enviar dados para n8n quando o usuário abre o chat
+    useEffect(() => {
+        if (isOpen && shopifyData && !hasSentToN8n.current) {
+            hasSentToN8n.current = true;
+            console.log('[BekaWidget] Enviando dados Shopify para n8n...');
+
+            fetch('/api/shopify-sync', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    timestamp: new Date().toISOString(),
+                    source: 'beka_widget_open',
+                    data: shopifyData,
+                }),
+            })
+                .then(res => {
+                    if (res.ok) {
+                        console.log('[BekaWidget] Dados enviados para n8n com sucesso!');
+                    } else {
+                        console.error('[BekaWidget] Erro ao enviar para n8n:', res.status);
+                    }
+                })
+                .catch(err => {
+                    console.error('[BekaWidget] Erro ao enviar para n8n:', err);
+                });
+        }
+    }, [isOpen, shopifyData]);
 
     // Notify parent window (host site) when widget opens/closes
     useEffect(() => {
