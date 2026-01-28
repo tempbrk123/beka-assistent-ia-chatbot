@@ -27,19 +27,17 @@ export function ChatWidget() {
     }, [shopifyData, syncError]);
 
     // Enviar dados para n8n quando o usuário abre o chat
+    // Se os dados ainda não chegaram, espera até 5 segundos
     useEffect(() => {
-        // Validação robusta: verificar se shopifyData existe E tem conteúdo útil
         const hasValidData = shopifyData && (shopifyData.shop || shopifyData.customer);
 
-        console.log('[BekaWidget] Check envio n8n:', {
-            isOpen,
-            hasData: !!shopifyData,
-            hasValidData,
-            hasSent: hasSentToN8n.current,
-            shopifyData,
-        });
+        // Se já enviou ou não está aberto, não faz nada
+        if (!isOpen || hasSentToN8n.current) {
+            return;
+        }
 
-        if (isOpen && hasValidData && !hasSentToN8n.current) {
+        // Se tem dados válidos, enviar imediatamente
+        if (hasValidData) {
             hasSentToN8n.current = true;
             console.log('[BekaWidget] Enviando dados Shopify para n8n:', shopifyData);
 
@@ -59,15 +57,16 @@ export function ChatWidget() {
                         console.log('[BekaWidget] Dados enviados para n8n com sucesso!');
                     } else {
                         console.error('[BekaWidget] Erro ao enviar para n8n:', res.status);
-                        // Se falhou, permitir retry
                         hasSentToN8n.current = false;
                     }
                 })
                 .catch(err => {
                     console.error('[BekaWidget] Erro ao enviar para n8n:', err);
-                    // Se falhou, permitir retry
                     hasSentToN8n.current = false;
                 });
+        } else {
+            // Dados ainda não chegaram - aguardar com timeout
+            console.log('[BekaWidget] Aguardando dados Shopify chegarem...');
         }
     }, [isOpen, shopifyData]);
 
