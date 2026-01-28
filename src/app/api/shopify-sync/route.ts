@@ -25,7 +25,6 @@ export async function POST(request: NextRequest) {
         // Extrair apenas os dados do contato do usuário
         const customer = data.customer || {};
         const contactData = {
-            login: customer.id || customer.email || null,
             nome: customer.name || customer.first_name || null,
             email: customer.email || null,
             phone: customer.phone || null,
@@ -38,7 +37,7 @@ export async function POST(request: NextRequest) {
         });
 
         // Verificar se temos pelo menos um dado de contato válido
-        const hasContactInfo = contactData.login || contactData.nome || contactData.email || contactData.phone;
+        const hasContactInfo = contactData.nome || contactData.email || contactData.phone;
 
         if (!hasContactInfo) {
             console.log('[PersistContact] Nenhum dado de contato válido, pulando envio');
