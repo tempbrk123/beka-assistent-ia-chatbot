@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const BEKA_API_URL = process.env.BEKA_API_URL || 'https://n8n.usebrk.com.br/webhook/beka_website_assistent';
+// Endpoint para persistir dados do contato (usado ao ABRIR o chat)
+const PERSIST_CONTACT_URL = 'https://n8n.usebrk.com.br/webhook/persistir-contato';
 const BEKA_API_TOKEN = process.env.BEKA_API_TOKEN || '';
 
 /**
- * Endpoint para receber e processar dados da sessão do Shopify
- * Estes dados chegam do hook useShopifyData quando o widget é carregado em uma loja Shopify
- * e são imediatamente enviados para o n8n
+ * Endpoint para persistir dados do contato do usuário
+ * Chamado quando o usuário abre o chat widget
+ * Envia apenas dados do contato: login, nome, email, phone
  */
 export async function POST(request: NextRequest) {
     try {
@@ -21,56 +22,64 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        console.log('[ShopifySync] Dados recebidos:', {
+        // Extrair apenas os dados do contato do usuário
+        const customer = data.customer || {};
+        const contactData = {
+            login: customer.id || customer.email || null,
+            nome: customer.name || customer.first_name || null,
+            email: customer.email || null,
+            phone: customer.phone || null,
+        };
+
+        console.log('[PersistContact] Dados do contato recebidos:', {
             timestamp,
             source,
-            shop: data.shop,
-            customer: data.customer?.id || data.customer?.name || 'Visitante',
-            cartItemCount: data.cart?.item_count || 0,
-            hasProduct: !!data.product,
+            contact: contactData,
         });
 
-        // Enviar dados para o n8n
-        if (!BEKA_API_URL || !BEKA_API_TOKEN) {
-            console.error('[ShopifySync] Configuration Error: Missing BEKA_API_URL or BEKA_API_TOKEN');
-            return NextResponse.json(
-                { error: 'Server configuration error: Missing API credentials' },
-                { status: 500 }
-            );
+        // Verificar se temos pelo menos um dado de contato válido
+        const hasContactInfo = contactData.login || contactData.nome || contactData.email || contactData.phone;
+
+        if (!hasContactInfo) {
+            console.log('[PersistContact] Nenhum dado de contato válido, pulando envio');
+            return NextResponse.json({
+                success: true,
+                message: 'Nenhum dado de contato para persistir (visitante anônimo)',
+                receivedAt: new Date().toISOString(),
+            });
         }
 
-        console.log('[ShopifySync] Enviando dados para n8n...');
+        console.log('[PersistContact] Enviando dados do contato para n8n...');
 
-        const n8nResponse = await fetch(BEKA_API_URL, {
+        const n8nResponse = await fetch(PERSIST_CONTACT_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${BEKA_API_TOKEN}`,
+                ...(BEKA_API_TOKEN && { 'Authorization': `Bearer ${BEKA_API_TOKEN}` }),
             },
             body: JSON.stringify({
-                type: 'shopify_session_init',
                 timestamp,
                 source,
-                shopifyData: data,
+                ...contactData,
             }),
         });
 
         if (!n8nResponse.ok) {
-            console.error('[ShopifySync] n8n retornou erro:', n8nResponse.status);
+            console.error('[PersistContact] n8n retornou erro:', n8nResponse.status);
             // Não falhar a requisição, apenas logar
         } else {
-            console.log('[ShopifySync] Dados enviados para n8n com sucesso!');
+            console.log('[PersistContact] Dados do contato enviados para n8n com sucesso!');
         }
 
         return NextResponse.json({
             success: true,
-            message: 'Dados da Shopify sincronizados com sucesso',
+            message: 'Dados do contato persistidos com sucesso',
             receivedAt: new Date().toISOString(),
         });
     } catch (error) {
-        console.error('[ShopifySync] Erro ao processar dados:', error);
+        console.error('[PersistContact] Erro ao processar dados:', error);
         return NextResponse.json(
-            { error: 'Erro ao processar dados da Shopify' },
+            { error: 'Erro ao persistir dados do contato' },
             { status: 500 }
         );
     }
