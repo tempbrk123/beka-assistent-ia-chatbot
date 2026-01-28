@@ -6,7 +6,7 @@ const BEKA_API_TOKEN = process.env.BEKA_API_TOKEN || '';
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { message } = body;
+        const { message, shopifyData } = body;
 
         if (!message || typeof message !== 'string') {
             return NextResponse.json(
@@ -23,7 +23,11 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        console.log('Enviando para API:', { message, url: BEKA_API_URL });
+        console.log('Enviando para API:', {
+            message,
+            url: BEKA_API_URL,
+            hasShopifyData: !!shopifyData,
+        });
 
         const response = await fetch(BEKA_API_URL, {
             method: 'POST',
@@ -31,7 +35,10 @@ export async function POST(request: NextRequest) {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${BEKA_API_TOKEN}`,
             },
-            body: JSON.stringify({ message }),
+            body: JSON.stringify({
+                message,
+                shopifyData: shopifyData || undefined,
+            }),
         });
 
         console.log('Status da resposta:', response.status);

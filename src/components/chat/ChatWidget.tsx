@@ -45,7 +45,7 @@ export function ChatWidget() {
                 )}
             >
                 <div className="h-full w-full rounded-4xl shadow-2xl overflow-hidden bg-background/80 backdrop-blur-md">
-                    <ChatContainer onClose={() => setIsOpen(false)} />
+                    <ChatContainer onClose={() => setIsOpen(false)} shopifyData={shopifyData} />
                 </div>
             </div>
 

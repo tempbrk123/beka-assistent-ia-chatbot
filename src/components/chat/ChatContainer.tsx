@@ -6,6 +6,7 @@ import { ChatMessage } from './ChatMessage';
 import { ChatInput } from './ChatInput';
 import { Loader2, X } from 'lucide-react';
 import { SplitText } from '@/components/ui/SplitText';
+import { BekaAppData } from '@/hooks/useShopifyData';
 
 const STORAGE_KEY = 'beka-chat-history';
 
@@ -15,9 +16,10 @@ function generateId(): string {
 
 interface ChatContainerProps {
     onClose?: () => void;
+    shopifyData?: BekaAppData | null;
 }
 
-export function ChatContainer({ onClose }: ChatContainerProps) {
+export function ChatContainer({ onClose, shopifyData }: ChatContainerProps) {
     const [messages, setMessages] = useState<Message[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -81,7 +83,10 @@ export function ChatContainer({ onClose }: ChatContainerProps) {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ message: content }),
+                body: JSON.stringify({
+                    message: content,
+                    shopifyData: shopifyData || undefined,
+                }),
             });
 
             if (!response.ok) {
@@ -136,7 +141,10 @@ export function ChatContainer({ onClose }: ChatContainerProps) {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ message: newContent }),
+                body: JSON.stringify({
+                    message: newContent,
+                    shopifyData: shopifyData || undefined,
+                }),
             });
 
             if (!response.ok) {
