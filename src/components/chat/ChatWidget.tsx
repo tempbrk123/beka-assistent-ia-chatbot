@@ -84,12 +84,14 @@ export function ChatWidget() {
             // Processar resposta baseado na mensagem
             const message = result.message;
 
-            if (message === API_MESSAGES.DADOS_AUSENTES) {
+            if (message === API_MESSAGES.DADOS_AUSENTES || message?.includes('Dados ausentes')) {
                 console.log('[BekaWidget] Dados ausentes - mostrando formulário');
                 setAuthStatus('needs_data');
             } else if (
                 message === API_MESSAGES.USUARIO_CRIADO ||
-                message === API_MESSAGES.USUARIO_ATUALIZADO
+                message === API_MESSAGES.USUARIO_ATUALIZADO ||
+                message?.includes('Usuário criado') ||
+                message?.includes('Usuário atualizado')
             ) {
                 console.log('[BekaWidget] Usuário autenticado com sucesso!');
                 setAuthStatus('authenticated');

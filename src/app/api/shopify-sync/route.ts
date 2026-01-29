@@ -36,17 +36,8 @@ export async function POST(request: NextRequest) {
             contact: contactData,
         });
 
-        // Verificar se temos pelo menos um dado de contato válido
-        const hasContactInfo = contactData.nome || contactData.email || contactData.phone;
-
-        if (!hasContactInfo) {
-            console.log('[PersistContact] Nenhum dado de contato válido, pulando envio');
-            return NextResponse.json({
-                success: true,
-                message: 'Nenhum dado de contato para persistir (visitante anônimo)',
-                receivedAt: new Date().toISOString(),
-            });
-        }
+        // Verificação removida para forçar validação no n8n
+        // const hasContactInfo = contactData.nome || contactData.email || contactData.phone;
 
         console.log('[PersistContact] Enviando dados do contato para n8n...');
 
