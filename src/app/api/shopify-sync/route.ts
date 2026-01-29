@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 // Endpoint para persistir dados do contato (usado ao ABRIR o chat)
-const PERSIST_CONTACT_URL = 'https://n8n.usebrk.com.br/webhook/persistir-contato';
+const PERSIST_CONTACT_URL = 'https://n8n.usebrk.com.br/webhook/persistir-contato-chatwoot';
 const BEKA_API_TOKEN = process.env.BEKA_API_TOKEN || '';
 
 /**

@@ -26,48 +26,40 @@ export function ChatWidget() {
         }
     }, [shopifyData, syncError]);
 
-    // Enviar dados para n8n quando o usuário abre o chat
-    // Se os dados ainda não chegaram, espera até 5 segundos
+    // Enviar dados para persistir-contato quando o usuário abre o chat
     useEffect(() => {
-        const hasValidData = shopifyData && (shopifyData.shop || shopifyData.customer);
-
         // Se já enviou ou não está aberto, não faz nada
         if (!isOpen || hasSentToN8n.current) {
             return;
         }
 
-        // Se tem dados válidos, enviar imediatamente
-        if (hasValidData) {
-            hasSentToN8n.current = true;
-            console.log('[BekaWidget] Enviando dados Shopify para n8n:', shopifyData);
+        // SEMPRE enviar quando o chat abrir (com ou sem dados Shopify)
+        hasSentToN8n.current = true;
+        console.log('[BekaWidget] Chat aberto - Enviando dados para persistir-contato:', shopifyData);
 
-            fetch('/api/shopify-sync', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    timestamp: new Date().toISOString(),
-                    source: 'beka_widget_open',
-                    data: shopifyData,
-                }),
-            })
-                .then(res => {
-                    if (res.ok) {
-                        console.log('[BekaWidget] Dados enviados para n8n com sucesso!');
-                    } else {
-                        console.error('[BekaWidget] Erro ao enviar para n8n:', res.status);
-                        hasSentToN8n.current = false;
-                    }
-                })
-                .catch(err => {
-                    console.error('[BekaWidget] Erro ao enviar para n8n:', err);
+        fetch('/api/shopify-sync', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                timestamp: new Date().toISOString(),
+                source: 'beka_widget_open',
+                data: shopifyData || {},
+            }),
+        })
+            .then(res => {
+                if (res.ok) {
+                    console.log('[BekaWidget] Dados enviados para persistir-contato com sucesso!');
+                } else {
+                    console.error('[BekaWidget] Erro ao enviar para persistir-contato:', res.status);
                     hasSentToN8n.current = false;
-                });
-        } else {
-            // Dados ainda não chegaram - aguardar com timeout
-            console.log('[BekaWidget] Aguardando dados Shopify chegarem...');
-        }
+                }
+            })
+            .catch(err => {
+                console.error('[BekaWidget] Erro ao enviar para persistir-contato:', err);
+                hasSentToN8n.current = false;
+            });
     }, [isOpen, shopifyData]);
 
     // Notify parent window (host site) when widget opens/closes
