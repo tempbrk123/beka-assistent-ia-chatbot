@@ -63,16 +63,25 @@ export async function POST(request: NextRequest) {
             }),
         });
 
+        // Parse n8n response to get the message
+        const n8nData = await n8nResponse.json().catch(() => ({}));
+        const n8nMessage = n8nData.message || null;
+
         if (!n8nResponse.ok) {
             console.error('[PersistContact] n8n retornou erro:', n8nResponse.status);
-            // Não falhar a requisição, apenas logar
+            // Retorna a mensagem de erro do n8n
+            return NextResponse.json({
+                success: false,
+                message: n8nMessage || 'Erro ao processar contato',
+                receivedAt: new Date().toISOString(),
+            });
         } else {
-            console.log('[PersistContact] Dados do contato enviados para n8n com sucesso!');
+            console.log('[PersistContact] Resposta do n8n:', n8nMessage);
         }
 
         return NextResponse.json({
             success: true,
-            message: 'Dados do contato persistidos com sucesso',
+            message: n8nMessage || 'Dados do contato persistidos com sucesso',
             receivedAt: new Date().toISOString(),
         });
     } catch (error) {
