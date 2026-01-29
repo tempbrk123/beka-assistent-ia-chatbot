@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { ChatContainer } from '@/components/chat/ChatContainer';
 import { UserDataForm } from '@/components/chat/UserDataForm';
 import { Launcher } from '@/components/chat/Launcher';
@@ -11,27 +11,22 @@ import { Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 // Tipos de status de autenticação
 type AuthStatus = 'idle' | 'pending' | 'needs_data' | 'authenticated' | 'error';
 
-// Mensagens de resposta da API
-const API_MESSAGES = {
-    DADOS_AUSENTES: 'Dados ausentes.',
-    USUARIO_CRIADO: 'Usuário criado com sucesso.',
-    USUARIO_ATUALIZADO: 'Usuário atualizado com sucesso.',
-    CONTATO_ERRO: 'Contato não pode ser criado nem atualizado.',
-};
-
 export function ChatWidget() {
     const [isOpen, setIsOpen] = useState(false);
     const [authStatus, setAuthStatus] = useState<AuthStatus>('idle');
     const [authError, setAuthError] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const hasSentToN8n = useRef(false);
+
+    // Refs para controle de fluxo
+    const isAuthenticatingRef = useRef(false);
+    const hasCheckedAuthRef = useRef(false);
 
     // Dados do formulário submetido (para usar junto com shopifyData)
     const [manualUserData, setManualUserData] = useState<{ nome: string; email: string; phone: string } | null>(null);
 
     // Capturar dados da Shopify (sem autoSync para /api/shopify-sync)
     const { data: shopifyData, error: syncError } = useShopifyData({
-        autoSync: false,  // Não sincronizar automaticamente
+        autoSync: false,
         preventDuplicateSync: true,
     });
 
@@ -48,7 +43,14 @@ export function ChatWidget() {
     /**
      * Envia dados para o webhook de persistir contato
      */
-    const sendToN8n = async (userData?: { nome: string; email: string; phone: string }) => {
+    const sendToN8n = useCallback(async (userData?: { nome: string; email: string; phone: string }) => {
+        // Prevenir chamadas duplicadas
+        if (isAuthenticatingRef.current) {
+            console.log('[BekaWidget] Já está autenticando, ignorando chamada duplicada');
+            return;
+        }
+
+        isAuthenticatingRef.current = true;
         setAuthStatus('pending');
         setAuthError(null);
 
@@ -81,33 +83,29 @@ export function ChatWidget() {
             const result = await response.json();
             console.log('[BekaWidget] Resposta da API:', result);
 
-            // Processar resposta baseado na mensagem
-            const message = result.message;
-
-            if (message === API_MESSAGES.DADOS_AUSENTES || message?.includes('Dados ausentes')) {
+            // Processar resposta usando as flags da API
+            if (result.needsData) {
+                // Usuário não autenticado - mostrar formulário
                 console.log('[BekaWidget] Dados ausentes - mostrando formulário');
                 setAuthStatus('needs_data');
-            } else if (
-                message === API_MESSAGES.USUARIO_CRIADO ||
-                message === API_MESSAGES.USUARIO_ATUALIZADO ||
-                message?.includes('Usuário criado') ||
-                message?.includes('Usuário atualizado')
-            ) {
+            } else if (result.success) {
+                // Usuário autenticado com sucesso
                 console.log('[BekaWidget] Usuário autenticado com sucesso!');
                 setAuthStatus('authenticated');
-                hasSentToN8n.current = true;
-            } else if (message === API_MESSAGES.CONTATO_ERRO) {
+            } else if (result.isError) {
+                // Erro ao processar contato
                 console.error('[BekaWidget] Erro: contato não pode ser criado/atualizado');
                 setAuthStatus('error');
-                setAuthError('Não foi possível criar seu cadastro. Por favor, tente novamente.');
+                setAuthError(result.message || 'Não foi possível criar seu cadastro. Por favor, tente novamente.');
             } else {
-                // Resposta inesperada - verificar se foi sucesso
-                if (result.success) {
-                    console.log('[BekaWidget] Resposta de sucesso não reconhecida, liberando chat');
+                // Fallback: verificar mensagem para compatibilidade
+                const message = result.message;
+                if (message?.includes('Dados ausentes')) {
+                    setAuthStatus('needs_data');
+                } else if (message?.includes('Usuário criado') || message?.includes('Usuário atualizado')) {
                     setAuthStatus('authenticated');
-                    hasSentToN8n.current = true;
                 } else {
-                    console.error('[BekaWidget] Resposta de erro não reconhecida:', message);
+                    console.error('[BekaWidget] Resposta não reconhecida:', result);
                     setAuthStatus('error');
                     setAuthError(message || 'Erro desconhecido. Por favor, tente novamente.');
                 }
@@ -116,8 +114,10 @@ export function ChatWidget() {
             console.error('[BekaWidget] Erro ao enviar para persistir-contato:', error);
             setAuthStatus('error');
             setAuthError('Erro de conexão. Por favor, verifique sua internet e tente novamente.');
+        } finally {
+            isAuthenticatingRef.current = false;
         }
-    };
+    }, [shopifyData]);
 
     // Enviar dados quando o usuário abre o chat
     useEffect(() => {
@@ -130,9 +130,22 @@ export function ChatWidget() {
             return;
         }
 
-        // Reset para idle quando abre
-        if (authStatus === 'idle') {
+        // Verificar apenas uma vez quando abre
+        if (authStatus === 'idle' && !hasCheckedAuthRef.current) {
+            hasCheckedAuthRef.current = true;
             sendToN8n();
+        }
+    }, [isOpen, authStatus, sendToN8n]);
+
+    // Reset estado quando fecha o chat
+    useEffect(() => {
+        if (!isOpen) {
+            // Só reseta se estava em estado de erro ou needs_data
+            // Não reseta se já estava autenticado
+            if (authStatus !== 'authenticated') {
+                hasCheckedAuthRef.current = false;
+                // Não resetamos para idle aqui para evitar re-verificação desnecessária
+            }
         }
     }, [isOpen, authStatus]);
 
@@ -155,11 +168,16 @@ export function ChatWidget() {
     /**
      * Handler para retry em caso de erro
      */
-    const handleRetry = () => {
+    const handleRetry = useCallback(() => {
+        hasCheckedAuthRef.current = false;
+        isAuthenticatingRef.current = false;
         setAuthStatus('idle');
         setAuthError(null);
-        sendToN8n(manualUserData || undefined);
-    };
+        // Dispara verificação novamente no próximo render
+        setTimeout(() => {
+            sendToN8n(manualUserData || undefined);
+        }, 100);
+    }, [manualUserData, sendToN8n]);
 
     /**
      * Renderiza o conteúdo baseado no status de autenticação

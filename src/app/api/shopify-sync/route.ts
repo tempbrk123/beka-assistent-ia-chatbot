@@ -8,6 +8,12 @@ const BEKA_API_TOKEN = process.env.BEKA_API_TOKEN || '';
  * Endpoint para persistir dados do contato do usuário
  * Chamado quando o usuário abre o chat widget
  * Envia apenas dados do contato: login, nome, email, phone
+ * 
+ * Respostas possíveis do n8n:
+ * - "Dados ausentes." - Usuário não autenticado, precisa preencher formulário
+ * - "Usuário criado com sucesso." - Novo usuário criado
+ * - "Usuário atualizado com sucesso." - Usuário existente atualizado
+ * - "Contato não pode ser criado nem atualizado." - Erro ao processar
  */
 export async function POST(request: NextRequest) {
     try {
@@ -17,7 +23,7 @@ export async function POST(request: NextRequest) {
         // Validar se temos dados da Shopify
         if (!data) {
             return NextResponse.json(
-                { error: 'Dados da Shopify não fornecidos' },
+                { success: false, error: 'Dados da Shopify não fornecidos' },
                 { status: 400 }
             );
         }
@@ -36,9 +42,6 @@ export async function POST(request: NextRequest) {
             contact: contactData,
         });
 
-        // Verificação removida para forçar validação no n8n
-        // const hasContactInfo = contactData.nome || contactData.email || contactData.phone;
-
         console.log('[PersistContact] Enviando dados do contato para n8n...');
 
         const n8nResponse = await fetch(PERSIST_CONTACT_URL, {
@@ -54,31 +57,51 @@ export async function POST(request: NextRequest) {
             }),
         });
 
-        // Parse n8n response to get the message
-        const n8nData = await n8nResponse.json().catch(() => ({}));
-        const n8nMessage = n8nData.message || null;
-
-        if (!n8nResponse.ok) {
-            console.error('[PersistContact] n8n retornou erro:', n8nResponse.status);
-            // Retorna a mensagem de erro do n8n
-            return NextResponse.json({
-                success: false,
-                message: n8nMessage || 'Erro ao processar contato',
-                receivedAt: new Date().toISOString(),
-            });
-        } else {
-            console.log('[PersistContact] Resposta do n8n:', n8nMessage);
+        // Parse n8n response
+        let n8nData: { message?: string } = {};
+        try {
+            n8nData = await n8nResponse.json();
+        } catch {
+            console.warn('[PersistContact] Não foi possível parsear resposta do n8n');
         }
 
+        const n8nMessage = n8nData.message || null;
+        console.log('[PersistContact] Resposta do n8n:', { status: n8nResponse.status, message: n8nMessage });
+
+        // Sempre retornamos 200 OK para o frontend, 
+        // passando a mensagem do n8n para que o frontend decida o que fazer
+        // Isso é importante porque "Dados ausentes" não é um erro técnico,
+        // apenas indica que o usuário precisa preencher o formulário
+
+        // Determinar sucesso baseado na mensagem
+        const isSuccess = n8nMessage === 'Usuário criado com sucesso.' ||
+            n8nMessage === 'Usuário atualizado com sucesso.' ||
+            n8nMessage?.includes('Usuário criado') ||
+            n8nMessage?.includes('Usuário atualizado');
+
+        const needsData = n8nMessage === 'Dados ausentes.' ||
+            n8nMessage?.includes('Dados ausentes');
+
+        const isError = n8nMessage === 'Contato não pode ser criado nem atualizado.';
+
         return NextResponse.json({
-            success: true,
-            message: n8nMessage || 'Dados do contato persistidos com sucesso',
+            success: isSuccess,
+            needsData: needsData,
+            isError: isError,
+            message: n8nMessage || (n8nResponse.ok ? 'Dados processados' : 'Erro ao processar'),
             receivedAt: new Date().toISOString(),
         });
+
     } catch (error) {
         console.error('[PersistContact] Erro ao processar dados:', error);
         return NextResponse.json(
-            { error: 'Erro ao persistir dados do contato' },
+            {
+                success: false,
+                needsData: false,
+                isError: true,
+                error: 'Erro ao persistir dados do contato',
+                message: 'Erro de conexão com o servidor.'
+            },
             { status: 500 }
         );
     }
