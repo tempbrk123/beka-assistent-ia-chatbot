@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
         });
 
         // Parse n8n response
-        let n8nData: { message?: string } = {};
+        let n8nData: { message?: string; contact_id?: number } = {};
         try {
             n8nData = await n8nResponse.json();
         } catch {
@@ -66,7 +66,8 @@ export async function POST(request: NextRequest) {
         }
 
         const n8nMessage = n8nData.message || null;
-        console.log('[PersistContact] Resposta do n8n:', { status: n8nResponse.status, message: n8nMessage });
+        const contactId = n8nData.contact_id || null;
+        console.log('[PersistContact] Resposta do n8n:', { status: n8nResponse.status, message: n8nMessage, contact_id: contactId });
 
         // Sempre retornamos 200 OK para o frontend, 
         // passando a mensagem do n8n para que o frontend decida o que fazer
@@ -93,6 +94,7 @@ export async function POST(request: NextRequest) {
             needsData: needsData,
             isError: isError,
             message: n8nMessage || (n8nResponse.ok ? 'Dados processados' : 'Erro ao processar'),
+            contactId: contactId,
             receivedAt: new Date().toISOString(),
         });
 
