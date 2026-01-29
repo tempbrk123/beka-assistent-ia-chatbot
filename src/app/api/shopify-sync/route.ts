@@ -74,15 +74,19 @@ export async function POST(request: NextRequest) {
         // apenas indica que o usuário precisa preencher o formulário
 
         // Determinar sucesso baseado na mensagem
+        // NOTA: "Contato não pode ser criado nem atualizado" = contato JÁ EXISTE, então é SUCESSO!
         const isSuccess = n8nMessage === 'Usuário criado com sucesso.' ||
             n8nMessage === 'Usuário atualizado com sucesso.' ||
+            n8nMessage === 'Contato não pode ser criado nem atualizado.' ||
             n8nMessage?.includes('Usuário criado') ||
-            n8nMessage?.includes('Usuário atualizado');
+            n8nMessage?.includes('Usuário atualizado') ||
+            n8nMessage?.includes('Contato não pode ser criado nem atualizado');
 
         const needsData = n8nMessage === 'Dados ausentes.' ||
             n8nMessage?.includes('Dados ausentes');
 
-        const isError = n8nMessage === 'Contato não pode ser criado nem atualizado.';
+        // Erro é apenas quando há falha de conexão ou resposta inesperada
+        const isError = !isSuccess && !needsData && !n8nResponse.ok;
 
         return NextResponse.json({
             success: isSuccess,
