@@ -6,6 +6,7 @@ import { UserDataForm } from '@/components/chat/UserDataForm';
 import { Launcher } from '@/components/chat/Launcher';
 import { cn } from '@/lib/utils';
 import { useShopifyData, BekaAppData } from '@/hooks/useShopifyData';
+import { useStoreTheme } from '@/hooks/useStoreTheme';
 import { Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 
 // Tipos de status de autenticação
@@ -29,6 +30,9 @@ export function ChatWidget() {
         autoSync: false,
         preventDuplicateSync: true,
     });
+
+    // Aplicar tema baseado na loja da Shopify
+    useStoreTheme(shopifyData?.store);
 
     // Log para debug
     useEffect(() => {

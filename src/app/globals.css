@@ -120,3 +120,76 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* ========================================
+   TEMAS POR LOJA (Store Themes)
+   ======================================== */
+
+/* AGRO Theme - Verde (Padrão) - #4a9d23 */
+.theme-agro,
+:root {
+  --primary: 101 63.5% 37.6%;
+  /* #4a9d23 */
+  --ring: 101 63.5% 37.6%;
+  --secondary: 101 40% 96.1%;
+  --muted: 101 40% 96.1%;
+  --accent: 101 40% 96.1%;
+}
+
+.theme-agro.dark,
+.dark {
+  --primary: 101 63.5% 37.6%;
+  --ring: 101 63.5% 37.6%;
+  --secondary: 101 32.6% 17.5%;
+  --muted: 101 32.6% 17.5%;
+  --accent: 101 32.6% 17.5%;
+}
+
+/* FISHING Theme - Azul - #135ed1 */
+.theme-fishing {
+  --primary: 216 84% 45%;
+  /* #135ed1 */
+  --ring: 216 84% 45%;
+  --secondary: 216 40% 96.1%;
+  --muted: 216 40% 96.1%;
+  --accent: 216 40% 96.1%;
+}
+
+.theme-fishing.dark {
+  --primary: 216 84% 45%;
+  --ring: 216 84% 45%;
+  --secondary: 216 32.6% 17.5%;
+  --muted: 216 32.6% 17.5%;
+  --accent: 216 32.6% 17.5%;
+}
+
+/* MOTORS Theme - Laranja - #fc5106 */
+.theme-motors {
+  --primary: 19 97% 51%;
+  /* #fc5106 */
+  --ring: 19 97% 51%;
+  --secondary: 19 40% 96.1%;
+  --muted: 19 40% 96.1%;
+  --accent: 19 40% 96.1%;
+}
+
+.theme-motors.dark {
+  --primary: 19 97% 51%;
+  --ring: 19 97% 51%;
+  --secondary: 19 32.6% 17.5%;
+  --muted: 19 32.6% 17.5%;
+  --accent: 19 32.6% 17.5%;
+}
+
+/* Atualiza cores de compatibilidade baseadas no tema atual */
+.theme-fishing {
+  --color-accent-mint: hsl(216 84% 45%);
+  --color-accent-lime: hsl(216 84% 45%);
+  --color-accent-green-dark: hsl(216 84% 45%);
+}
+
+.theme-motors {
+  --color-accent-mint: hsl(19 97% 51%);
+  --color-accent-lime: hsl(19 97% 51%);
+  --color-accent-green-dark: hsl(19 97% 51%);
+}

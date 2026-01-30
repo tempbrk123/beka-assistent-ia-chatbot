@@ -44,7 +44,11 @@ export interface ShopifyShop {
     [key: string]: unknown;
 }
 
+// Tipos de loja disponíveis
+export type StoreType = 'AGRO' | 'FISHING' | 'MOTORS' | 'DEFAULT';
+
 export interface BekaAppData {
+    store?: StoreType;
     shop?: string | ShopifyShop;
     customer?: ShopifyCustomer & { name?: string };
     cart?: ShopifyCart;
