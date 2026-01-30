@@ -73,8 +73,8 @@ export function UserDataForm({ onSubmit, isLoading = false, error, store }: User
         Refatorado: Removemos divs aninhadas desnecessárias e posições absolutas.
         Usamos apenas flexbox para centralizar.
     */}
-            <div className="mb-6 p-4 rounded-full backdrop-blur-sm bg-white/10 flex items-center justify-center">
-                <img src={logoIcon} alt="Beka" className="w-23 h-auto" />
+            <div className="mb-6 p-4 rounded-full backdrop-blur-sm flex items-center justify-center">
+                <img src={logoIcon} alt="Beka" className="w-19 h-auto" />
             </div>
 
             {/* Title */}
