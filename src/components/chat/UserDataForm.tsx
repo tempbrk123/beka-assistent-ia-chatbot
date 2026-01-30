@@ -2,18 +2,24 @@
 
 import { useState } from 'react';
 import { Loader2, User, Mail, Phone, AlertCircle } from 'lucide-react';
+import { useStoreLogo } from '@/hooks/useStoreLogo';
+import { StoreType } from '@/hooks/useShopifyData';
 
 interface UserDataFormProps {
     onSubmit: (data: { nome: string; email: string; phone: string }) => Promise<void>;
     isLoading?: boolean;
     error?: string | null;
+    store?: StoreType;
 }
 
-export function UserDataForm({ onSubmit, isLoading = false, error }: UserDataFormProps) {
+export function UserDataForm({ onSubmit, isLoading = false, error, store }: UserDataFormProps) {
     const [nome, setNome] = useState('');
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
     const [validationError, setValidationError] = useState<string | null>(null);
+
+    // Obter logo da loja
+    const { logoIcon } = useStoreLogo(store);
 
     const validateEmail = (email: string): boolean => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -68,9 +74,9 @@ export function UserDataForm({ onSubmit, isLoading = false, error }: UserDataFor
 
             {/* Icon */}
             <div className="relative w-24 h-24 mb-6 flex items-center justify-center">
-                <div className="absolute inset-0 bg-gradient-to-tr from-accent-mint via-accent-lime to-accent-yellow rounded-full blur-xl opacity-80 animate-pulse" />
+                <div className="absolute inset-0 bg-linear-to-tr from-accent-mint via-accent-lime to-accent-yellow rounded-full blur-xl opacity-80 animate-pulse" />
                 <div className="absolute inset-2 bg-surface-white/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-inner overflow-hidden">
-                    <img src="/logo_beka_only.png" alt="Beka" className="theme-logo" />
+                    <img src={logoIcon} alt="Beka" className="w-16 h-16 object-contain" />
                 </div>
             </div>
 
@@ -132,7 +138,7 @@ export function UserDataForm({ onSubmit, isLoading = false, error }: UserDataFor
                 {/* Error Messages */}
                 {(validationError || error) && (
                     <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm">
-                        <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                        <AlertCircle className="h-4 w-4 shrink-0" />
                         <span>{validationError || error}</span>
                     </div>
                 )}
@@ -141,7 +147,7 @@ export function UserDataForm({ onSubmit, isLoading = false, error }: UserDataFor
                 <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-accent-mint to-accent-lime text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center justify-center gap-2"
+                    className="w-full py-3.5 rounded-2xl bg-linear-to-r from-accent-mint to-accent-lime text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center justify-center gap-2"
                 >
                     {isLoading ? (
                         <>

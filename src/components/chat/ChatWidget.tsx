@@ -34,16 +34,6 @@ export function ChatWidget() {
     // Aplicar tema baseado na loja da Shopify
     useStoreTheme(shopifyData?.store);
 
-    // Log para debug
-    useEffect(() => {
-        if (shopifyData) {
-            console.log('[BekaWidget] Dados Shopify capturados:', shopifyData);
-        }
-        if (syncError) {
-            console.error('[BekaWidget] Erro na sincronização:', syncError);
-        }
-    }, [shopifyData, syncError]);
-
     /**
      * Envia dados para o webhook de persistir contato
      */
@@ -194,7 +184,7 @@ export function ChatWidget() {
                 return (
                     <div className="flex flex-col items-center justify-center h-full gap-4">
                         <div className="relative w-20 h-20">
-                            <div className="absolute inset-0 bg-gradient-to-tr from-accent-mint via-accent-lime to-accent-yellow rounded-full blur-xl opacity-80 animate-pulse" />
+                            <div className="absolute inset-0 bg-linear-to-tr from-accent-mint via-accent-lime to-accent-yellow rounded-full blur-xl opacity-80 animate-pulse" />
                             <div className="absolute inset-2 bg-surface-white/80 backdrop-blur-sm rounded-full flex items-center justify-center">
                                 <Loader2 className="w-8 h-8 animate-spin text-accent-mint" />
                             </div>
@@ -210,6 +200,7 @@ export function ChatWidget() {
                         onSubmit={handleFormSubmit}
                         isLoading={isSubmitting}
                         error={authError}
+                        store={shopifyData?.store}
                     />
                 );
 
@@ -218,7 +209,7 @@ export function ChatWidget() {
                 return (
                     <div className="flex flex-col items-center justify-center h-full px-6 gap-6">
                         <div className="relative w-20 h-20">
-                            <div className="absolute inset-0 bg-gradient-to-tr from-red-400 to-orange-400 rounded-full blur-xl opacity-60 animate-pulse" />
+                            <div className="absolute inset-0 bg-linear-to-tr from-red-400 to-orange-400 rounded-full blur-xl opacity-60 animate-pulse" />
                             <div className="absolute inset-2 bg-surface-white/80 backdrop-blur-sm rounded-full flex items-center justify-center">
                                 <AlertCircle className="w-8 h-8 text-red-500" />
                             </div>
@@ -233,7 +224,7 @@ export function ChatWidget() {
                         </div>
                         <button
                             onClick={handleRetry}
-                            className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-accent-mint to-accent-lime text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5"
+                            className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-linear-to-r from-accent-mint to-accent-lime text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5"
                         >
                             <RefreshCw className="w-4 h-4" />
                             Tentar Novamente

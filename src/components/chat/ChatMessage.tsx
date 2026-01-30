@@ -163,7 +163,7 @@ export function ChatMessage({ message, onButtonClick, onEdit }: ChatMessageProps
                         {(message.content as Product[]).map((product, index) => (
                             <div
                                 key={`${product.handle}-${index}`}
-                                className="flex-shrink-0 w-[200px] md:w-[240px] transform transition-transform hover:scale-[1.02]"
+                                className="shrink-0 w-[200px] md:w-[240px] transform transition-transform hover:scale-[1.02]"
                                 onDragStart={(e) => e.preventDefault()}
                             >
                                 <ProductCard product={product} />
