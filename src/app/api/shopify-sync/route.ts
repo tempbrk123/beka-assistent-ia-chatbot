@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
             needsData: needsData,
             isError: isError,
             message: n8nMessage || (n8nResponse.ok ? 'Dados processados' : 'Erro ao processar'),
-            contactId: contactId,
+            contact_id: contactId,
             receivedAt: new Date().toISOString(),
         });
 
