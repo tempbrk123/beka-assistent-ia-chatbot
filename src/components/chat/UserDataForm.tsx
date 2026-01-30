@@ -63,17 +63,17 @@ export function UserDataForm({ onSubmit, isLoading = false, error }: UserDataFor
     return (
         <div className="flex flex-col items-center justify-center h-full px-6 pt-12 pb-8 relative z-10">
             {/* Drag Handle - Clean gray pill indicator */}
-            <div className="absolute top-3 left-1/2 -translate-x-1/2 w-10 h-1 bg-gray-300 rounded-full" />
+            <div className="absolute top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-gray-400/80 rounded-full" />
 
             {/* Background Decor */}
             <div className="aurora-glow top-[-10%] left-[-10%] opacity-60 animate-pulse pointer-events-none z-0" />
             <div className="aurora-glow bottom-[10%] right-[-5%] w-[500px] h-[100px] opacity-40 pointer-events-none z-0" />
 
             {/* Icon */}
-            <div className="relative w-24 h-24 mb-6 flex items-center justify-center">
+            <div className="relative w-24 h-24 mb-6 flex items-center justify-center z-20">
                 <div className="absolute inset-0 bg-gradient-to-tr from-accent-mint via-accent-lime to-accent-yellow rounded-full blur-xl opacity-80 animate-pulse" />
-                <div className="absolute inset-2 bg-surface-white/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-inner overflow-hidden">
-                    <img src="/logo_beka_only.png" alt="Beka" className="w-16 h-16 object-contain theme-logo" />
+                <div className="absolute inset-2 bg-white rounded-full flex items-center justify-center shadow-lg overflow-hidden border-2 border-white">
+                    <img src="/logo_beka_only.png" alt="Beka" className="w-16 h-16 object-contain" />
                 </div>
             </div>
 
@@ -90,7 +90,7 @@ export function UserDataForm({ onSubmit, isLoading = false, error }: UserDataFor
                 {/* Nome */}
                 <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <User className="h-5 w-5" style={{ color: '#555555' }} />
+                        <User className="h-5 w-5 text-gray-600" />
                     </div>
                     <input
                         type="text"
@@ -98,14 +98,14 @@ export function UserDataForm({ onSubmit, isLoading = false, error }: UserDataFor
                         value={nome}
                         onChange={(e) => setNome(e.target.value)}
                         disabled={isLoading}
-                        className="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-surface-white/80 backdrop-blur-sm border border-gray-200 text-text-primary placeholder:text-[#757575] focus:outline-none focus:ring-2 focus:ring-accent-mint/50 focus:border-accent-mint transition-all disabled:opacity-50"
+                        className="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-white/90 backdrop-blur-md border border-gray-300 text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-mint/50 focus:border-accent-mint transition-all disabled:opacity-50"
                     />
                 </div>
 
                 {/* Email */}
                 <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <Mail className="h-5 w-5" style={{ color: '#555555' }} />
+                        <Mail className="h-5 w-5 text-gray-600" />
                     </div>
                     <input
                         type="email"
@@ -113,14 +113,14 @@ export function UserDataForm({ onSubmit, isLoading = false, error }: UserDataFor
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         disabled={isLoading}
-                        className="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-surface-white/80 backdrop-blur-sm border border-gray-200 text-text-primary placeholder:text-[#757575] focus:outline-none focus:ring-2 focus:ring-accent-mint/50 focus:border-accent-mint transition-all disabled:opacity-50"
+                        className="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-white/90 backdrop-blur-md border border-gray-300 text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-mint/50 focus:border-accent-mint transition-all disabled:opacity-50"
                     />
                 </div>
 
                 {/* Telefone */}
                 <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <Phone className="h-5 w-5" style={{ color: '#555555' }} />
+                        <Phone className="h-5 w-5 text-gray-600" />
                     </div>
                     <input
                         type="tel"
@@ -128,7 +128,7 @@ export function UserDataForm({ onSubmit, isLoading = false, error }: UserDataFor
                         value={phone}
                         onChange={handlePhoneChange}
                         disabled={isLoading}
-                        className="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-surface-white/80 backdrop-blur-sm border border-gray-200 text-text-primary placeholder:text-[#757575] focus:outline-none focus:ring-2 focus:ring-accent-mint/50 focus:border-accent-mint transition-all disabled:opacity-50"
+                        className="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-white/90 backdrop-blur-md border border-gray-300 text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-mint/50 focus:border-accent-mint transition-all disabled:opacity-50"
                     />
                 </div>
 
