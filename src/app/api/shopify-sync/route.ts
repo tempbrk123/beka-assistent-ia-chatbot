@@ -31,7 +31,9 @@ export async function POST(request: NextRequest) {
         // Extrair apenas os dados do contato do usuário
         const customer = data.customer || {};
         const contactData = {
-            nome: customer.name || customer.first_name || null,
+            nome: customer.name || null,
+            first_name: customer.first_name || null,
+            last_name: customer.last_name || null,
             email: customer.email || null,
             phone: customer.phone || null,
         };
