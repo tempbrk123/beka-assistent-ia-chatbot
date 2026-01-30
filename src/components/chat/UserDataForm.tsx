@@ -76,7 +76,7 @@ export function UserDataForm({ onSubmit, isLoading = false, error, store }: User
             <div className="relative w-24 h-24 mb-6 flex items-center justify-center">
                 <div className="absolute inset-0 bg-linear-to-tr from-accent-mint via-accent-lime to-accent-yellow rounded-full blur-xl opacity-80 animate-pulse" />
                 <div className="absolute inset-2 bg-surface-white/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-inner overflow-hidden">
-                    <img src={logoIcon} alt="Beka" className="w-16 h-16 object-contain" />
+                    <img src={logoIcon} alt="Beka" />
                 </div>
             </div>
 
@@ -93,7 +93,7 @@ export function UserDataForm({ onSubmit, isLoading = false, error, store }: User
                 {/* Nome */}
                 <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <User className="h-5 w-5 from-accent-mint" />
+                        <User className="h-5 w-5 text-accent-mint" />
                     </div>
                     <input
                         type="text"
@@ -108,7 +108,7 @@ export function UserDataForm({ onSubmit, isLoading = false, error, store }: User
                 {/* Email */}
                 <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <Mail className="h-5 w-5 from-accent-mint" />
+                        <Mail className="h-5 w-5 text-accent-mint" />
                     </div>
                     <input
                         type="email"
@@ -123,7 +123,7 @@ export function UserDataForm({ onSubmit, isLoading = false, error, store }: User
                 {/* Telefone */}
                 <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <Phone className="h-5 w-5 from-accent-mint" />
+                        <Phone className="h-5 w-5 text-accent-mint" />
                     </div>
                     <input
                         type="tel"
