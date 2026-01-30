@@ -70,7 +70,7 @@ export function UserDataForm({ onSubmit, isLoading = false, error }: UserDataFor
             <div className="relative w-24 h-24 mb-6 flex items-center justify-center">
                 <div className="absolute inset-0 bg-gradient-to-tr from-accent-mint via-accent-lime to-accent-yellow rounded-full blur-xl opacity-80 animate-pulse" />
                 <div className="absolute inset-2 bg-surface-white/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-inner overflow-hidden">
-                    <img src="/logo_beka_only.png" alt="Beka" className="w-16 h-16 object-contain" />
+                    <img src="/logo_beka_only.png" alt="Beka" className="w-16 h-16 object-contain theme-logo" />
                 </div>
             </div>
 

@@ -193,3 +193,26 @@
   --color-accent-lime: hsl(19 97% 51%);
   --color-accent-green-dark: hsl(19 97% 51%);
 }
+
+/* ========================================
+   FILTROS DE COR PARA LOGO
+   Base: Logo verde (AGRO) - #4a9d23 (hue ~101°)
+   ======================================== */
+
+/* AGRO - Sem filtro (cor original verde) */
+.theme-agro .theme-logo,
+:root .theme-logo {
+  filter: none;
+}
+
+/* FISHING - Verde para Azul (#135ed1 - hue ~216°) */
+/* Rotação: 216° - 101° = 115° */
+.theme-fishing .theme-logo {
+  filter: hue-rotate(115deg) saturate(1.2);
+}
+
+/* MOTORS - Verde para Laranja (#fc5106 - hue ~19°) */
+/* Rotação: 19° - 101° = -82° (ou 278°) */
+.theme-motors .theme-logo {
+  filter: hue-rotate(-82deg) saturate(1.3) brightness(1.1);
+}

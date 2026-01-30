@@ -184,7 +184,7 @@ export function ChatContainer({ onClose, shopifyData }: ChatContainerProps) {
             <header className="absolute top-0 left-0 right-0 z-50 px-6 pt-6 pb-3 flex items-center justify-between from-surface-white/95 via-surface-white/80 to-transparent backdrop-blur-md transition-all duration-300">
                 <div className="flex items-center gap-3">
                     <div className="h-10 bg-surface-white/50 backdrop-blur-md flex items-center justify-center shadow-sm border border-white/40 overflow-hidden rounded-full px-2">
-                        <img src="/logo_beka_ia.png" alt="Beka" className="h-8 object-contain" />
+                        <img src="/logo_beka_ia.png" alt="Beka" className="h-8 object-contain theme-logo" />
                     </div>
                 </div>
 
@@ -221,7 +221,7 @@ export function ChatContainer({ onClose, shopifyData }: ChatContainerProps) {
                         <div className="relative w-32 h-32 mb-8 flex items-center justify-center">
                             <div className="absolute inset-0 bg-gradient-to-tr from-accent-mint via-accent-lime to-accent-yellow rounded-full blur-xl opacity-80 animate-pulse" />
                             <div className="absolute inset-2 bg-surface-white/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-inner overflow-hidden">
-                                <img src="/logo_beka_only.png" alt="Beka" className="w-20 h-20 object-contain" />
+                                <img src="/logo_beka_only.png" alt="Beka" className="w-20 h-20 object-contain theme-logo" />
                             </div>
                         </div>
 
