@@ -42,7 +42,7 @@ export function UserDataForm({ onSubmit, isLoading = false, error }: UserDataFor
 
         // Validações
         if (!nome.trim()) {
-            setValidationError('Por favor, informe seu nome.');
+            setValidationError('Por favor, informe seu nome completo.');
             return;
         }
 
@@ -70,7 +70,7 @@ export function UserDataForm({ onSubmit, isLoading = false, error }: UserDataFor
             <div className="relative w-24 h-24 mb-6 flex items-center justify-center">
                 <div className="absolute inset-0 bg-gradient-to-tr from-accent-mint via-accent-lime to-accent-yellow rounded-full blur-xl opacity-80 animate-pulse" />
                 <div className="absolute inset-2 bg-surface-white/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-inner overflow-hidden">
-                    <img src="/logo_beka_only.png" alt="Beka" className="w-16 h-16 object-contain theme-logo" />
+                    <img src="/logo_beka_only.png" alt="Beka" className="theme-logo" />
                 </div>
             </div>
 
@@ -87,7 +87,7 @@ export function UserDataForm({ onSubmit, isLoading = false, error }: UserDataFor
                 {/* Nome */}
                 <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <User className="h-5 w-5 text-text-secondary" />
+                        <User className="h-5 w-5 from-accent-mint" />
                     </div>
                     <input
                         type="text"
@@ -102,7 +102,7 @@ export function UserDataForm({ onSubmit, isLoading = false, error }: UserDataFor
                 {/* Email */}
                 <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <Mail className="h-5 w-5 text-text-secondary" />
+                        <Mail className="h-5 w-5 from-accent-mint" />
                     </div>
                     <input
                         type="email"
@@ -117,7 +117,7 @@ export function UserDataForm({ onSubmit, isLoading = false, error }: UserDataFor
                 {/* Telefone */}
                 <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <Phone className="h-5 w-5 text-text-secondary" />
+                        <Phone className="h-5 w-5 from-accent-mint" />
                     </div>
                     <input
                         type="tel"
