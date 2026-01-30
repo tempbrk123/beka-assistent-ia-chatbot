@@ -68,16 +68,13 @@ export function UserDataForm({ onSubmit, isLoading = false, error, store }: User
 
     return (
         <div className="flex flex-col items-center justify-center h-full px-6 py-8 relative z-10">
-            {/* Background Decor */}
-            <div className="aurora-glow top-[-10%] left-[-10%] opacity-60 animate-pulse pointer-events-none z-0" />
-            <div className="aurora-glow bottom-[10%] right-[-5%] w-[500px] h-[100px] opacity-40 pointer-events-none z-0" />
 
-            {/* Icon */}
-            <div className="relative w-24 h-24 mb-6 flex items-center justify-center">
-                <div className="absolute inset-0 bg-linear-to-tr from-accent-mint via-accent-lime to-accent-yellow rounded-full blur-xl opacity-80 animate-pulse" />
-                <div className="absolute inset-2 bg-surface-white/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-inner overflow-hidden">
-                    <img src={logoIcon} alt="Beka" />
-                </div>
+            {/* Header / Logo 
+        Refatorado: Removemos divs aninhadas desnecessárias e posições absolutas.
+        Usamos apenas flexbox para centralizar.
+    */}
+            <div className="mb-6 p-4 rounded-full backdrop-blur-sm bg-white/10 flex items-center justify-center">
+                <img src={logoIcon} alt="Beka" className="w-23 h-auto" />
             </div>
 
             {/* Title */}
@@ -90,48 +87,49 @@ export function UserDataForm({ onSubmit, isLoading = false, error, store }: User
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4">
-                {/* Nome */}
-                <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <User className="h-5 w-5 text-accent-mint" />
-                    </div>
+
+                {/* PADRÃO INPUT GROUP (Sem Position Absolute)
+           1. O container pai (div) age como a "caixa" visual (borda, fundo, arredondamento).
+           2. Usamos 'focus-within' no pai para que ele mude de cor quando o input filho for clicado.
+           3. O input fica transparente e sem bordas, preenchendo o espaço restante (flex-1).
+        */}
+
+                {/* Campo Nome */}
+                <div className="flex items-center gap-3 w-full px-4 py-3.5 rounded-2xl bg-surface-white/60 backdrop-blur-sm border border-black/10 transition-all focus-within:ring-2 focus-within:ring-accent-mint/50 focus-within:border-accent-mint">
+                    <User className="h-5 w-5 text-accent-mint shrink-0" />
                     <input
                         type="text"
                         placeholder="Seu nome"
                         value={nome}
                         onChange={(e) => setNome(e.target.value)}
                         disabled={isLoading}
-                        className="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-surface-white/60 backdrop-blur-sm border border-white/40 text-text-primary placeholder:text-text-secondary/60 focus:outline-none focus:ring-2 focus:ring-accent-mint/50 focus:border-accent-mint transition-all disabled:opacity-50"
+                        className="flex-1 bg-transparent border-none outline-none text-text-primary placeholder:text-text-secondary/60 disabled:opacity-50 min-w-0"
                     />
                 </div>
 
-                {/* Email */}
-                <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <Mail className="h-5 w-5 text-accent-mint" />
-                    </div>
+                {/* Campo Email */}
+                <div className="flex items-center gap-3 w-full px-4 py-3.5 rounded-2xl bg-surface-white/60 backdrop-blur-sm border border-black/10 transition-all focus-within:ring-2 focus-within:ring-accent-mint/50 focus-within:border-accent-mint">
+                    <Mail className="h-5 w-5 text-accent-mint shrink-0" />
                     <input
                         type="email"
                         placeholder="Seu e-mail"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         disabled={isLoading}
-                        className="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-surface-white/60 backdrop-blur-sm border border-white/40 text-text-primary placeholder:text-text-secondary/60 focus:outline-none focus:ring-2 focus:ring-accent-mint/50 focus:border-accent-mint transition-all disabled:opacity-50"
+                        className="flex-1 bg-transparent border-none outline-none text-text-primary placeholder:text-text-secondary/60 disabled:opacity-50 min-w-0"
                     />
                 </div>
 
-                {/* Telefone */}
-                <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <Phone className="h-5 w-5 text-accent-mint" />
-                    </div>
+                {/* Campo Telefone */}
+                <div className="flex items-center gap-3 w-full px-4 py-3.5 rounded-2xl bg-surface-white/60 backdrop-blur-sm border border-black/10 transition-all focus-within:ring-2 focus-within:ring-accent-mint/50 focus-within:border-accent-mint">
+                    <Phone className="h-5 w-5 text-accent-mint shrink-0" />
                     <input
                         type="tel"
                         placeholder="(00) 00000-0000"
                         value={phone}
                         onChange={handlePhoneChange}
                         disabled={isLoading}
-                        className="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-surface-white/60 backdrop-blur-sm border border-white/40 text-text-primary placeholder:text-text-secondary/60 focus:outline-none focus:ring-2 focus:ring-accent-mint/50 focus:border-accent-mint transition-all disabled:opacity-50"
+                        className="flex-1 bg-transparent border-none outline-none text-text-primary placeholder:text-text-secondary/60 disabled:opacity-50 min-w-0"
                     />
                 </div>
 
@@ -147,7 +145,7 @@ export function UserDataForm({ onSubmit, isLoading = false, error, store }: User
                 <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full py-3.5 rounded-2xl bg-linear-to-r from-accent-mint to-accent-lime text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center justify-center gap-2"
+                    className="w-full py-3.5 rounded-2xl bg-linear-to-r from-accent-mint to-accent-lime text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center cursor-pointer justify-center gap-2"
                 >
                     {isLoading ? (
                         <>
@@ -159,7 +157,6 @@ export function UserDataForm({ onSubmit, isLoading = false, error, store }: User
                     )}
                 </button>
             </form>
-
             {/* Privacy Note */}
             <p className="text-xs text-text-secondary/60 text-center mt-6 max-w-xs">
                 Suas informações são protegidas e utilizadas apenas para seu atendimento.
