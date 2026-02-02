@@ -300,6 +300,7 @@ export function ChatContainer({ onClose, shopifyData, contactId }: ChatContainer
                                 message={message}
                                 onButtonClick={sendMessage}
                                 onEdit={handleEditMessage}
+                                logoIcon={logoIcon}
                             />
                         ))}
                         {isLoading && (

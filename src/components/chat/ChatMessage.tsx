@@ -14,6 +14,7 @@ interface ChatMessageProps {
     message: Message;
     onButtonClick?: (label: string) => void;
     onEdit?: (id: string, newContent: string) => void;
+    logoIcon?: string; // Logo do avatar do bot baseado na loja
 }
 
 // Formatar timestamp para hora:minuto
@@ -47,11 +48,11 @@ function MessageStatus({ status }: { status?: Message['status'] }) {
 }
 
 // Avatar do bot com cor mais clara
-function BotAvatar() {
+function BotAvatar({ logoIcon }: { logoIcon?: string }) {
     return (
         <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0 shadow-sm border border-primary/10">
             <img
-                src="/logo_beka_only.png"
+                src={logoIcon || '/logo_beka_agro.png'}
                 alt="Beka"
                 className="w-5 h-5 object-contain"
             />
@@ -59,7 +60,7 @@ function BotAvatar() {
     );
 }
 
-export function ChatMessage({ message, onButtonClick, onEdit }: ChatMessageProps) {
+export function ChatMessage({ message, onButtonClick, onEdit, logoIcon }: ChatMessageProps) {
     const isUser = message.role === 'user';
     const isProductResponse = Array.isArray(message.content);
     const hasButtonLabels = message.buttonLabels && message.buttonLabels.length > 0;
@@ -194,7 +195,7 @@ export function ChatMessage({ message, onButtonClick, onEdit }: ChatMessageProps
             ) : isProductResponse ? (
                 <div className="w-full space-y-4">
                     <div className="flex items-start gap-2 px-4">
-                        <BotAvatar />
+                        <BotAvatar logoIcon={logoIcon} />
                         <div className="flex flex-col gap-1">
                             <p className="text-sm md:text-base text-text-secondary font-medium">
                                 Encontrei alguns produtos que podem te interessar:
@@ -233,7 +234,7 @@ export function ChatMessage({ message, onButtonClick, onEdit }: ChatMessageProps
             ) : (
                 <div className="w-full flex justify-start">
                     <div className="flex items-start gap-2 max-w-[90%] md:max-w-[65%]">
-                        <BotAvatar />
+                        <BotAvatar logoIcon={logoIcon} />
                         <div className="flex flex-col gap-1">
                             <div className="rounded-[20px] rounded-bl-[4px] px-5 py-4 bg-primary/10 backdrop-blur-xl text-text-primary border border-primary/20 shadow-sm flex flex-col gap-3">
 
