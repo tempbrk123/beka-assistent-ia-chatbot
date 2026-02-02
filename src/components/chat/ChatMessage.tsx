@@ -49,12 +49,19 @@ function MessageStatus({ status }: { status?: Message['status'] }) {
 
 // Avatar do bot com cor mais clara
 function BotAvatar({ logoIcon }: { logoIcon?: string }) {
+    const defaultLogo = '/logo_beka_agro.png';
+    const imgSrc = logoIcon && logoIcon.trim() !== '' ? logoIcon : defaultLogo;
+
     return (
         <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0 shadow-sm border border-primary/10">
             <img
-                src={logoIcon || '/logo_beka_agro.png'}
+                src={imgSrc}
                 alt="Beka"
                 className="w-5 h-5 object-contain"
+                onError={(e) => {
+                    console.error('[BotAvatar] Erro ao carregar logo:', imgSrc);
+                    (e.target as HTMLImageElement).src = defaultLogo;
+                }}
             />
         </div>
     );

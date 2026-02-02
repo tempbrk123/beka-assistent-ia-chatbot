@@ -74,7 +74,14 @@ export function UserDataForm({ onSubmit, isLoading = false, error, store }: User
         Usamos apenas flexbox para centralizar.
     */}
             <div className="mb-6 p-4 rounded-full backdrop-blur-sm flex items-center justify-center">
-                <img src={logoIcon} alt="Beka" className="w-19 h-auto" />
+                <img
+                    src={logoIcon || '/logo_beka_agro.png'}
+                    alt="Beka"
+                    className="w-19 h-auto"
+                    onError={(e) => {
+                        (e.target as HTMLImageElement).src = '/logo_beka_agro.png';
+                    }}
+                />
             </div>
 
             {/* Title */}
