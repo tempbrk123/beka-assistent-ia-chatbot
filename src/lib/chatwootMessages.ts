@@ -3,13 +3,15 @@
  * Armazena mensagens recebidas via webhook organizadas por contact_id
  */
 
+import { Product } from '@/types/chat';
 export interface ChatwootMessage {
     id: string;
-    content: string;
+    content: string | Product[];
     sender_name: string;
     sender_type: 'user' | 'contact'; // user = agente, contact = cliente
     timestamp: number;
     contact_id: number;
+    buttonLabels?: string[]; // Botões de opção quando a IA faz perguntas
 }
 
 type MessageListener = (message: ChatwootMessage) => void;
@@ -43,7 +45,8 @@ class ChatwootMessageStore {
             listeners.forEach(listener => listener(message));
         }
 
-        console.log(`[ChatwootStore] Mensagem adicionada para contact_id ${contactId}:`, message.content);
+        console.log(`[ChatwootStore] Mensagem adicionada para contact_id ${contactId}:`,
+            typeof message.content === 'string' ? message.content.substring(0, 50) : '[Products]');
     }
 
     /**
