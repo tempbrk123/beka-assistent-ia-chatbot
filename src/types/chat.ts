@@ -13,6 +13,7 @@ export interface Message {
   timestamp: number;
   audioUrl?: string; // URL do blog de áudio para exibição na UI
   buttonLabels?: string[]; // Botões de opção quando a IA faz perguntas
+  status?: 'sending' | 'sent' | 'delivered' | 'seen'; // Status de entrega da mensagem
 }
 
 export interface BekaResponse {

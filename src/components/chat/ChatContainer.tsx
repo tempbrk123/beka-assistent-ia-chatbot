@@ -117,13 +117,15 @@ export function ChatContainer({ onClose, shopifyData, contactId }: ChatContainer
             audioUrl = URL.createObjectURL(audioBlob);
         }
 
-        // Add user message
+        // Add user message with 'sending' status
+        const messageId = generateId();
         const userMessage: Message = {
-            id: generateId(),
+            id: messageId,
             role: 'user',
             content,
             timestamp: Date.now(),
-            audioUrl: audioUrl, // Store local audio URL for UI
+            audioUrl: audioUrl,
+            status: 'sending',
         };
         setMessages((prev) => [...prev, userMessage]);
         setIsLoading(true);
@@ -150,12 +152,19 @@ export function ChatContainer({ onClose, shopifyData, contactId }: ChatContainer
                 const persistData = await persistResponse.json();
                 console.log('[ChatContainer] Resposta da API persist-message:', persistData);
 
-                // A resposta virá via SSE do Chatwoot, não precisamos mais chamar /api/chat
-                // O isLoading será desativado quando recebermos a resposta via SSE
+                // Atualizar status para 'delivered' quando API confirma
+                setMessages(prev => prev.map(msg =>
+                    msg.id === messageId
+                        ? { ...msg, status: 'delivered' as const }
+                        : msg
+                ));
+
+                // A resposta virá via polling do Chatwoot
             } catch (error) {
                 console.error('[ChatContainer] Erro ao enviar para persist-message:', error);
                 setError('Erro ao enviar mensagem. Tente novamente.');
                 setIsLoading(false);
+                // Manter status como 'sending' para indicar falha
             }
         } else {
             console.warn('[ChatContainer] contactId não disponível, mensagem não pode ser enviada');
