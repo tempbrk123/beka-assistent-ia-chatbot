@@ -1,16 +1,60 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { chatwootStore, ChatwootMessage } from '@/lib/chatwootMessages';
 import { Product } from '@/types/chat';
 
+// Store simples usando variável global (funciona melhor em serverless)
+// Em produção real, usar Redis/Supabase/Firebase
+declare global {
+    // eslint-disable-next-line no-var
+    var chatwootPendingMessages: Map<number, PendingMessage[]> | undefined;
+}
+
+export interface PendingMessage {
+    id: string;
+    content: string | Product[];
+    sender_name: string;
+    timestamp: number;
+    buttonLabels?: string[];
+}
+
+// Inicializar store global
+if (!global.chatwootPendingMessages) {
+    global.chatwootPendingMessages = new Map();
+}
+
 /**
- * Webhook endpoint para receber eventos do Chatwoot
- * 
- * O Chatwoot envia eventos como message_created quando mensagens são enviadas/recebidas
- * Este endpoint filtra apenas mensagens de agentes (outgoing) e as armazena no store
- * 
- * O conteúdo pode ser:
- * - Texto simples
- * - JSON com formato { Beka: string | Product[], ButtonLabel?: string[] }
+ * GET: Polling endpoint - cliente busca mensagens pendentes
+ */
+export async function GET(request: NextRequest) {
+    const searchParams = request.nextUrl.searchParams;
+    const contactIdStr = searchParams.get('contact_id');
+
+    if (!contactIdStr) {
+        return NextResponse.json({ error: 'contact_id is required' }, { status: 400 });
+    }
+
+    const contactId = parseInt(contactIdStr, 10);
+
+    if (isNaN(contactId)) {
+        return NextResponse.json({ error: 'Invalid contact_id' }, { status: 400 });
+    }
+
+    // Buscar e limpar mensagens pendentes
+    const messages = global.chatwootPendingMessages?.get(contactId) || [];
+
+    if (messages.length > 0) {
+        global.chatwootPendingMessages?.delete(contactId);
+        console.log(`[ChatwootWebhook] GET - Retornando ${messages.length} mensagens para contact_id ${contactId}`);
+    }
+
+    return NextResponse.json({
+        success: true,
+        messages,
+        count: messages.length
+    });
+}
+
+/**
+ * POST: Webhook endpoint - recebe eventos do Chatwoot
  */
 export async function POST(request: NextRequest) {
     try {
@@ -28,13 +72,13 @@ export async function POST(request: NextRequest) {
         }
 
         // Extrair dados da mensagem
-        const messageType = payload.message_type; // 'incoming' = cliente, 'outgoing' = agente
+        const messageType = payload.message_type;
         const rawContent = payload.content;
         const messageId = payload.id?.toString() || payload.source_id;
         const sender = payload.sender;
         const conversation = payload.conversation;
 
-        // Extrair contact_id - pode estar em diferentes lugares do payload
+        // Extrair contact_id
         const contactId =
             conversation?.contact_inbox?.contact_id ||
             sender?.id ||
@@ -45,11 +89,9 @@ export async function POST(request: NextRequest) {
             content: rawContent?.substring?.(0, 100) || rawContent,
             messageId,
             contactId,
-            senderType: sender?.type
         });
 
         // Filtrar apenas mensagens de agentes (outgoing)
-        // Mensagens incoming são do cliente, não precisamos mostrar de volta
         if (messageType !== 'outgoing') {
             console.log('[ChatwootWebhook] Ignorando mensagem incoming (do cliente)');
             return NextResponse.json({ success: true, ignored: true, reason: 'incoming_message' });
@@ -65,12 +107,10 @@ export async function POST(request: NextRequest) {
         let buttonLabels: string[] | undefined;
 
         try {
-            // Tentar parse direto
             let parsed;
             try {
                 parsed = JSON.parse(rawContent);
             } catch {
-                // Tentar limpar markdown de código (```json ... ```)
                 const cleaned = rawContent.replace(/```json\s*|\s*```/g, '').trim();
                 if (cleaned.startsWith('{') || cleaned.startsWith('[')) {
                     parsed = JSON.parse(cleaned);
@@ -78,22 +118,15 @@ export async function POST(request: NextRequest) {
             }
 
             if (parsed) {
-                // Se for array direto, são produtos
                 if (Array.isArray(parsed)) {
                     finalContent = parsed as Product[];
-                    console.log('[ChatwootWebhook] Conteúdo é array de produtos:', parsed.length);
-                }
-                // Se tiver campo Beka, extrair
-                else if (parsed.Beka !== undefined) {
-                    // Beka pode ser string ou array de produtos
+                } else if (parsed.Beka !== undefined) {
                     if (typeof parsed.Beka === 'string') {
-                        // Verificar se Beka é JSON string
                         const trimmedBeka = parsed.Beka.trim();
                         if ((trimmedBeka.startsWith('[') && trimmedBeka.endsWith(']')) ||
                             (trimmedBeka.startsWith('{') && trimmedBeka.endsWith('}'))) {
                             try {
-                                const parsedBeka = JSON.parse(trimmedBeka);
-                                finalContent = parsedBeka;
+                                finalContent = JSON.parse(trimmedBeka);
                             } catch {
                                 finalContent = parsed.Beka;
                             }
@@ -104,43 +137,42 @@ export async function POST(request: NextRequest) {
                         finalContent = parsed.Beka;
                     }
 
-                    // Extrair ButtonLabel se existir
                     if (parsed.ButtonLabel && Array.isArray(parsed.ButtonLabel)) {
                         buttonLabels = parsed.ButtonLabel;
-                        console.log('[ChatwootWebhook] ButtonLabels extraídos:', buttonLabels);
                     }
-
-                    console.log('[ChatwootWebhook] Conteúdo Beka extraído:',
-                        typeof finalContent === 'string' ? finalContent.substring(0, 50) : '[Array]');
                 }
             }
-        } catch (e) {
+        } catch {
             // Não é JSON, manter como texto
-            console.log('[ChatwootWebhook] Conteúdo não é JSON, tratando como texto');
         }
 
-        // Criar mensagem para o store
-        const chatwootMessage: ChatwootMessage = {
+        // Criar mensagem pendente
+        const pendingMessage: PendingMessage = {
             id: messageId,
             content: finalContent,
             sender_name: sender?.name || sender?.available_name || 'Agente',
-            sender_type: 'user', // agente
             timestamp: Date.now(),
-            contact_id: contactId,
             buttonLabels: buttonLabels,
         };
 
-        // Adicionar ao store (isso também notifica os listeners SSE)
-        chatwootStore.addMessage(chatwootMessage);
+        // Adicionar ao store global
+        if (!global.chatwootPendingMessages) {
+            global.chatwootPendingMessages = new Map();
+        }
 
-        console.log('[ChatwootWebhook] Mensagem armazenada com sucesso');
+        const existing = global.chatwootPendingMessages.get(contactId) || [];
+
+        // Evitar duplicatas
+        if (!existing.some(m => m.id === pendingMessage.id)) {
+            existing.push(pendingMessage);
+            global.chatwootPendingMessages.set(contactId, existing);
+            console.log(`[ChatwootWebhook] Mensagem adicionada para contact_id ${contactId}`);
+        }
 
         return NextResponse.json({
             success: true,
             message_id: messageId,
             contact_id: contactId,
-            has_buttons: !!buttonLabels,
-            content_type: Array.isArray(finalContent) ? 'products' : 'text'
         });
 
     } catch (error) {
@@ -150,12 +182,4 @@ export async function POST(request: NextRequest) {
             { status: 500 }
         );
     }
-}
-
-// Também aceitar GET para verificação do endpoint
-export async function GET() {
-    return NextResponse.json({
-        status: 'ok',
-        message: 'Chatwoot webhook endpoint is ready'
-    });
 }

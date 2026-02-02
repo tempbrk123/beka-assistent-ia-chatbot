@@ -1,100 +1,105 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { ChatwootMessage } from '@/lib/chatwootMessages';
+import { Product } from '@/types/chat';
+
+interface ChatwootMessage {
+    id: string;
+    content: string | Product[];
+    sender_name: string;
+    timestamp: number;
+    buttonLabels?: string[];
+}
 
 interface UseChatwootMessagesOptions {
     contactId: number | null;
     enabled?: boolean;
+    pollInterval?: number; // Intervalo de polling em ms
 }
 
 /**
- * Hook para receber mensagens do Chatwoot via SSE
+ * Hook para receber mensagens do Chatwoot via polling
  * 
- * Conecta ao endpoint /api/chatwoot-sse e recebe mensagens em tempo real
- * quando o contact_id corresponde ao usuário atual
+ * Faz requisições periódicas para /api/chatwoot-webhook para buscar novas mensagens
  */
-export function useChatwootMessages({ contactId, enabled = true }: UseChatwootMessagesOptions) {
+export function useChatwootMessages({
+    contactId,
+    enabled = true,
+    pollInterval = 2000 // Poll a cada 2 segundos
+}: UseChatwootMessagesOptions) {
     const [messages, setMessages] = useState<ChatwootMessage[]>([]);
-    const [isConnected, setIsConnected] = useState(false);
+    const [isPolling, setIsPolling] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const eventSourceRef = useRef<EventSource | null>(null);
-    const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const pollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const isPollingRef = useRef(false);
 
-    const connect = useCallback(() => {
-        if (!contactId || !enabled) {
+    const fetchMessages = useCallback(async () => {
+        if (!contactId || !enabled || isPollingRef.current) {
             return;
         }
 
-        // Limpar conexão anterior
-        if (eventSourceRef.current) {
-            eventSourceRef.current.close();
-        }
-
-        console.log(`[useChatwootMessages] Conectando SSE para contact_id: ${contactId}`);
+        isPollingRef.current = true;
 
         try {
-            const eventSource = new EventSource(`/api/chatwoot-sse?contact_id=${contactId}`);
-            eventSourceRef.current = eventSource;
+            const response = await fetch(`/api/chatwoot-webhook?contact_id=${contactId}`);
 
-            eventSource.onopen = () => {
-                console.log('[useChatwootMessages] Conexão SSE estabelecida');
-                setIsConnected(true);
-                setError(null);
-            };
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
 
-            eventSource.onmessage = (event) => {
-                try {
-                    const message: ChatwootMessage = JSON.parse(event.data);
-                    console.log('[useChatwootMessages] Mensagem recebida:', message);
+            const data = await response.json();
 
-                    setMessages(prev => {
-                        // Evitar duplicatas
-                        if (prev.some(m => m.id === message.id)) {
-                            return prev;
-                        }
-                        return [...prev, message];
-                    });
-                } catch (e) {
-                    console.error('[useChatwootMessages] Erro ao parsear mensagem:', e);
-                }
-            };
+            if (data.messages && data.messages.length > 0) {
+                console.log('[useChatwootMessages] Novas mensagens recebidas:', data.messages.length);
 
-            eventSource.onerror = (e) => {
-                console.error('[useChatwootMessages] Erro na conexão SSE:', e);
-                setIsConnected(false);
-                setError('Conexão perdida');
+                setMessages(prev => {
+                    const existingIds = new Set(prev.map(m => m.id));
+                    const newMessages = data.messages.filter(
+                        (m: ChatwootMessage) => !existingIds.has(m.id)
+                    );
 
-                // Tentar reconectar após 5 segundos
-                eventSource.close();
-                reconnectTimeoutRef.current = setTimeout(() => {
-                    console.log('[useChatwootMessages] Tentando reconectar...');
-                    connect();
-                }, 5000);
-            };
+                    if (newMessages.length === 0) return prev;
 
+                    return [...prev, ...newMessages];
+                });
+            }
+
+            setError(null);
         } catch (e) {
-            console.error('[useChatwootMessages] Erro ao criar EventSource:', e);
-            setError('Falha ao conectar');
+            console.error('[useChatwootMessages] Erro ao buscar mensagens:', e);
+            setError('Erro de conexão');
+        } finally {
+            isPollingRef.current = false;
         }
     }, [contactId, enabled]);
 
-    // Conectar quando contactId muda ou enabled é true
+    // Iniciar/parar polling
     useEffect(() => {
-        if (contactId && enabled) {
-            connect();
+        if (!contactId || !enabled) {
+            setIsPolling(false);
+            return;
         }
 
+        setIsPolling(true);
+        console.log(`[useChatwootMessages] Iniciando polling para contact_id: ${contactId}`);
+
+        // Polling loop
+        const poll = () => {
+            fetchMessages();
+            pollTimeoutRef.current = setTimeout(poll, pollInterval);
+        };
+
+        // Primeira busca imediata
+        fetchMessages();
+        pollTimeoutRef.current = setTimeout(poll, pollInterval);
+
         return () => {
-            if (eventSourceRef.current) {
-                console.log('[useChatwootMessages] Fechando conexão SSE');
-                eventSourceRef.current.close();
-            }
-            if (reconnectTimeoutRef.current) {
-                clearTimeout(reconnectTimeoutRef.current);
+            console.log('[useChatwootMessages] Parando polling');
+            if (pollTimeoutRef.current) {
+                clearTimeout(pollTimeoutRef.current);
             }
         };
-    }, [contactId, enabled, connect]);
+    }, [contactId, enabled, pollInterval, fetchMessages]);
 
     // Limpar mensagens
     const clearMessages = useCallback(() => {
@@ -103,7 +108,7 @@ export function useChatwootMessages({ contactId, enabled = true }: UseChatwootMe
 
     return {
         messages,
-        isConnected,
+        isPolling,
         error,
         clearMessages,
     };
