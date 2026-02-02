@@ -235,7 +235,7 @@ export function ChatMessage({ message, onButtonClick, onEdit }: ChatMessageProps
                     <div className="flex items-start gap-2 max-w-[90%] md:max-w-[65%]">
                         <BotAvatar />
                         <div className="flex flex-col gap-1">
-                            <div className="rounded-[20px] rounded-bl-[4px] px-5 py-4 bg-surface-white/60 backdrop-blur-xl text-text-primary border border-white/40 shadow-sm flex flex-col gap-3">
+                            <div className="rounded-[20px] rounded-bl-[4px] px-5 py-4 bg-primary/10 backdrop-blur-xl text-text-primary border border-primary/20 shadow-sm flex flex-col gap-3">
 
                                 <div className="prose prose-sm md:prose-base dark:prose-invert max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5 text-text-primary leading-relaxed">
                                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
