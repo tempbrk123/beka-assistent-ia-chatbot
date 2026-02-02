@@ -81,23 +81,32 @@ export function ChatContainer({ onClose, shopifyData, contactId }: ChatContainer
         setMessages((prev) => [...prev, userMessage]);
         setIsLoading(true);
 
-        // Enviar para o webhook de persistir mensagens se tiver contact_id
+        // Enviar para a API de persistir mensagens (via backend para evitar CORS)
+        console.log('[ChatContainer] sendMessage - contactId recebido:', contactId);
+
         if (contactId) {
             try {
-                await fetch('https://n8n.usebrk.com.br/webhook/persistir-conversations-messages-chatwoot', {
+                const payload = {
+                    message: content,
+                    contact_id: contactId,
+                };
+                console.log('[ChatContainer] Enviando payload para /api/persist-message:', payload);
+
+                const persistResponse = await fetch('/api/persist-message', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({
-                        message: content,
-                        contact_id: contactId,
-                    }),
+                    body: JSON.stringify(payload),
                 });
-                console.log('[ChatContainer] Mensagem enviada para persistir-conversations-messages-chatwoot');
+
+                const persistData = await persistResponse.json();
+                console.log('[ChatContainer] Resposta da API persist-message:', persistData);
             } catch (error) {
-                console.error('[ChatContainer] Erro ao enviar para persistir-conversations:', error);
+                console.error('[ChatContainer] Erro ao enviar para persist-message:', error);
             }
+        } else {
+            console.warn('[ChatContainer] contactId não disponível, mensagem não persistida no Chatwoot');
         }
 
         try {
@@ -159,10 +168,10 @@ export function ChatContainer({ onClose, shopifyData, contactId }: ChatContainer
 
         setMessages([...newHistory, userMessage]);
 
-        // Enviar para o webhook de persistir mensagens se tiver contact_id
+        // Enviar para a API de persistir mensagens (via backend para evitar CORS)
         if (contactId) {
             try {
-                await fetch('https://n8n.usebrk.com.br/webhook/persistir-conversations-messages-chatwoot', {
+                const persistResponse = await fetch('/api/persist-message', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -172,9 +181,10 @@ export function ChatContainer({ onClose, shopifyData, contactId }: ChatContainer
                         contact_id: contactId,
                     }),
                 });
-                console.log('[ChatContainer] Mensagem editada enviada para persistir-conversations-messages-chatwoot');
+                const persistData = await persistResponse.json();
+                console.log('[ChatContainer] Mensagem editada persistida:', persistData);
             } catch (error) {
-                console.error('[ChatContainer] Erro ao enviar mensagem editada para persistir-conversations:', error);
+                console.error('[ChatContainer] Erro ao persistir mensagem editada:', error);
             }
         }
 
