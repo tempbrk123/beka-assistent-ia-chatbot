@@ -25,6 +25,9 @@ export function ChatWidget() {
     // Dados do formulário submetido (para usar junto com shopifyData)
     const [manualUserData, setManualUserData] = useState<{ nome: string; email: string; phone: string } | null>(null);
 
+    // Contact ID retornado pelo webhook de persistir contato
+    const [contactId, setContactId] = useState<number | null>(null);
+
     // Capturar dados da Shopify (sem autoSync para /api/shopify-sync)
     const { data: shopifyData, error: syncError } = useShopifyData({
         autoSync: false,
@@ -85,6 +88,11 @@ export function ChatWidget() {
             } else if (result.success) {
                 // Usuário autenticado com sucesso
                 console.log('[BekaWidget] Usuário autenticado com sucesso!');
+                // Capturar e armazenar o contact_id
+                if (result.contact_id) {
+                    console.log('[BekaWidget] contact_id recebido:', result.contact_id);
+                    setContactId(result.contact_id);
+                }
                 setAuthStatus('authenticated');
             } else if (result.isError) {
                 // Erro ao processar contato
@@ -97,6 +105,11 @@ export function ChatWidget() {
                 if (message?.includes('Dados ausentes')) {
                     setAuthStatus('needs_data');
                 } else if (message?.includes('Usuário criado') || message?.includes('Usuário atualizado')) {
+                    // Capturar o contact_id no fallback também
+                    if (result.contact_id) {
+                        console.log('[BekaWidget] contact_id recebido (fallback):', result.contact_id);
+                        setContactId(result.contact_id);
+                    }
                     setAuthStatus('authenticated');
                 } else {
                     console.error('[BekaWidget] Resposta não reconhecida:', result);
@@ -246,6 +259,7 @@ export function ChatWidget() {
                                 phone: manualUserData.phone,
                             },
                         } : shopifyData}
+                        contactId={contactId}
                     />
                 );
 

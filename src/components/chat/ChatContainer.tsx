@@ -18,9 +18,10 @@ function generateId(): string {
 interface ChatContainerProps {
     onClose?: () => void;
     shopifyData?: BekaAppData | null;
+    contactId?: number | null;
 }
 
-export function ChatContainer({ onClose, shopifyData }: ChatContainerProps) {
+export function ChatContainer({ onClose, shopifyData, contactId }: ChatContainerProps) {
     const [messages, setMessages] = useState<Message[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -80,6 +81,25 @@ export function ChatContainer({ onClose, shopifyData }: ChatContainerProps) {
         setMessages((prev) => [...prev, userMessage]);
         setIsLoading(true);
 
+        // Enviar para o webhook de persistir mensagens se tiver contact_id
+        if (contactId) {
+            try {
+                await fetch('https://n8n.usebrk.com.br/webhook/persistir-conversations-messages-chatwoot', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: content,
+                        contact_id: contactId,
+                    }),
+                });
+                console.log('[ChatContainer] Mensagem enviada para persistir-conversations-messages-chatwoot');
+            } catch (error) {
+                console.error('[ChatContainer] Erro ao enviar para persistir-conversations:', error);
+            }
+        }
+
         try {
             // Send ONLY text to backend
             const response = await fetch('/api/chat', {
@@ -138,6 +158,25 @@ export function ChatContainer({ onClose, shopifyData }: ChatContainerProps) {
         };
 
         setMessages([...newHistory, userMessage]);
+
+        // Enviar para o webhook de persistir mensagens se tiver contact_id
+        if (contactId) {
+            try {
+                await fetch('https://n8n.usebrk.com.br/webhook/persistir-conversations-messages-chatwoot', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: newContent,
+                        contact_id: contactId,
+                    }),
+                });
+                console.log('[ChatContainer] Mensagem editada enviada para persistir-conversations-messages-chatwoot');
+            } catch (error) {
+                console.error('[ChatContainer] Erro ao enviar mensagem editada para persistir-conversations:', error);
+            }
+        }
 
         try {
             const response = await fetch('/api/chat', {
