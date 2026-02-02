@@ -8,6 +8,7 @@ import { Loader2, X } from 'lucide-react';
 import { SplitText } from '@/components/ui/SplitText';
 import { BekaAppData } from '@/hooks/useShopifyData';
 import { useStoreLogo } from '@/hooks/useStoreLogo';
+import { useChatwootMessages } from '@/hooks/useChatwootMessages';
 
 const STORAGE_KEY = 'beka-chat-history';
 
@@ -27,9 +28,51 @@ export function ChatContainer({ onClose, shopifyData, contactId }: ChatContainer
     const [error, setError] = useState<string | null>(null);
     const [isHydrated, setIsHydrated] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const processedChatwootIdsRef = useRef<Set<string>>(new Set());
 
     // Obter logos da loja
     const { logoFull, logoIcon } = useStoreLogo(shopifyData?.store);
+
+    // Hook para receber mensagens do Chatwoot via SSE
+    const { messages: chatwootMessages } = useChatwootMessages({
+        contactId: contactId ?? null,
+        enabled: !!contactId,
+    });
+
+    // Mesclar mensagens do Chatwoot com mensagens locais
+    useEffect(() => {
+        if (chatwootMessages.length === 0) return;
+
+        // Processar apenas mensagens novas do Chatwoot
+        const newChatwootMessages = chatwootMessages.filter(
+            msg => !processedChatwootIdsRef.current.has(msg.id)
+        );
+
+        if (newChatwootMessages.length === 0) return;
+
+        // Converter mensagens do Chatwoot para formato local
+        const convertedMessages: Message[] = newChatwootMessages.map(msg => {
+            processedChatwootIdsRef.current.add(msg.id);
+            return {
+                id: `chatwoot-${msg.id}`,
+                role: 'assistant' as const,
+                content: msg.content,
+                timestamp: msg.timestamp,
+            };
+        });
+
+        console.log('[ChatContainer] Mensagens do Chatwoot recebidas:', convertedMessages.length);
+
+        setMessages(prev => {
+            // Evitar duplicatas
+            const existingIds = new Set(prev.map(m => m.id));
+            const uniqueNewMessages = convertedMessages.filter(m => !existingIds.has(m.id));
+
+            if (uniqueNewMessages.length === 0) return prev;
+
+            return [...prev, ...uniqueNewMessages];
+        });
+    }, [chatwootMessages]);
 
     // Load messages from localStorage on mount
     useEffect(() => {
