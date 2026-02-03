@@ -26,8 +26,8 @@
     // Initial Size (Launcher Button only)
     // Launcher is bottom-4 right-4, size 14 (56px) + shadow/hover space
     // We give it enough space to avoid clipping
-    iframe.style.width = "100px";
-    iframe.style.height = "100px";
+    iframe.style.width = "300px";
+    iframe.style.height = "300px";
     iframe.style.transition = "width 0.3s ease, height 0.3s ease";
     iframe.style.backgroundColor = "transparent";
 
@@ -81,6 +81,7 @@
             // Shrink back to launcher button size
             iframe.style.width = "100px";
             iframe.style.height = "100px";
+            iframe.style.transform = "translateY(-6rem)"
         } else if (event.data === "BEKA_REQUEST_SHOPIFY_DATA") {
             // Widget is requesting the Shopify data
             sendShopifyDataToWidget();
