@@ -26,10 +26,11 @@
     // Initial Size (Launcher Button only)
     // Launcher is bottom-4 right-4, size 14 (56px) + shadow/hover space
     // We give it enough space to avoid clipping
-    iframe.style.width = "300px";
-    iframe.style.height = "300px";
+    iframe.style.width = "100px";
+    iframe.style.height = "100px";
     iframe.style.transition = "width 0.3s ease, height 0.3s ease";
     iframe.style.backgroundColor = "transparent";
+    iframe.style.pointerEvents = "auto"; // Initially allow clicks on launcher
 
     document.body.appendChild(iframe);
 
@@ -77,11 +78,14 @@
             // We reserve slightly more space
             iframe.style.width = "450px";
             iframe.style.height = "650px";
+            iframe.style.pointerEvents = "auto"; // Allow interaction with chat
+            iframe.style.transform = "";
         } else if (event.data === "BEKA_WIDGET_CLOSE") {
             // Shrink back to launcher button size
             iframe.style.width = "100px";
             iframe.style.height = "100px";
-            iframe.style.transform = "translateY(-6rem)"
+            iframe.style.pointerEvents = "auto"; // Keep launcher clickable
+            iframe.style.transform = "";
         } else if (event.data === "BEKA_REQUEST_SHOPIFY_DATA") {
             // Widget is requesting the Shopify data
             sendShopifyDataToWidget();
