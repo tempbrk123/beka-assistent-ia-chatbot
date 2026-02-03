@@ -16,9 +16,9 @@ const PERSIST_MESSAGE_URL = 'https://n8n.usebrk.com.br/webhook/persistir-convers
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { message, contact_id } = body;
+        const { message, contact_id, store } = body;
 
-        console.log('[PersistMessage] Recebido:', { message, contact_id });
+        console.log('[PersistMessage] Recebido:', { message, contact_id, store });
 
         if (!message || typeof message !== 'string') {
             return NextResponse.json(
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        console.log('[PersistMessage] Enviando para webhook:', { message, contact_id });
+        console.log('[PersistMessage] Enviando para webhook:', { message, contact_id, store });
 
         const webhookResponse = await fetch(PERSIST_MESSAGE_URL, {
             method: 'POST',
@@ -45,6 +45,7 @@ export async function POST(request: NextRequest) {
             body: JSON.stringify({
                 message,
                 contact_id,
+                store,
             }),
         });
 

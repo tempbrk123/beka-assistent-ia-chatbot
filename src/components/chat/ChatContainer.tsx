@@ -138,6 +138,7 @@ export function ChatContainer({ onClose, shopifyData, contactId }: ChatContainer
                 const payload = {
                     message: content,
                     contact_id: contactId,
+                    store: shopifyData?.store,
                 };
                 console.log('[ChatContainer] Enviando payload para /api/persist-message:', payload);
 
@@ -206,6 +207,7 @@ export function ChatContainer({ onClose, shopifyData, contactId }: ChatContainer
                     body: JSON.stringify({
                         message: newContent,
                         contact_id: contactId,
+                        store: shopifyData?.store,
                     }),
                 });
                 const persistData = await persistResponse.json();
