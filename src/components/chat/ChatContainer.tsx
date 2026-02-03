@@ -287,11 +287,31 @@ export function ChatContainer({ onClose, shopifyData, contactId }: ChatContainer
                             </div>
                         </div>
 
-                        <h2 className="text-3xl md:text-4xl font-bold text-text-primary mb-3 tracking-tight">
-                            <SplitText text="Olá! Sou a Beka" delay={300} />
+                        <h2 className="text-3xl md:text-3xl font-bold text-text-primary mb-3 tracking-tight">
+                            <SplitText
+                                text={(() => {
+                                    // Pegar firstName da Shopify ou o primeiro nome do campo name (formulário)
+                                    const firstName = shopifyData?.customer?.firstName
+                                        || shopifyData?.customer?.name?.split(' ')[0];
+                                    return firstName
+                                        ? `Olá ${firstName}, sou a Beka`
+                                        : "Olá! Sou a Beka";
+                                })()}
+                                delay={300}
+                            />
                         </h2>
                         <p className="text-text-secondary max-w-md mb-10 text-lg leading-relaxed font-medium">
-                            <SplitText text="Como posso te ajudar hoje?" delay={1000} className="text-lg" />
+                            <SplitText
+                                text={(() => {
+                                    const firstName = shopifyData?.customer?.firstName
+                                        || shopifyData?.customer?.name?.split(' ')[0];
+                                    return firstName
+                                        ? "Como posso ajudar?"
+                                        : "Como posso te ajudar hoje?";
+                                })()}
+                                delay={1000}
+                                className="text-lg"
+                            />
                         </p>
 
                         <div className="flex flex-wrap gap-3 justify-center max-w-2xl">

@@ -36,36 +36,12 @@ function MessageStatus({ status }: { status?: Message['status'] }) {
         return <Check className="h-3.5 w-3.5 text-text-secondary/70" />;
     }
 
-    // delivered ou seen - duplo check
+    // delivered ou seen - duplo check verde
     return (
-        <CheckCheck
-            className={cn(
-                "h-3.5 w-3.5",
-                status === 'seen' ? "text-primary" : "text-text-secondary/70"
-            )}
-        />
+        <CheckCheck className="h-3.5 w-3.5 text-primary" />
     );
 }
 
-// Avatar do bot com cor mais clara
-function BotAvatar({ logoIcon }: { logoIcon?: string }) {
-    const defaultLogo = '/logo_beka_agro.png';
-    const imgSrc = logoIcon && logoIcon.trim() !== '' ? logoIcon : defaultLogo;
-
-    return (
-        <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0 shadow-sm border border-primary/10">
-            <img
-                src={imgSrc}
-                alt="Beka"
-                className="w-5 h-5 object-contain"
-                onError={(e) => {
-                    console.error('[BotAvatar] Erro ao carregar logo:', imgSrc);
-                    (e.target as HTMLImageElement).src = defaultLogo;
-                }}
-            />
-        </div>
-    );
-}
 
 export function ChatMessage({ message, onButtonClick, onEdit, logoIcon }: ChatMessageProps) {
     const isUser = message.role === 'user';
@@ -202,7 +178,7 @@ export function ChatMessage({ message, onButtonClick, onEdit, logoIcon }: ChatMe
             ) : isProductResponse ? (
                 <div className="w-full space-y-4">
                     <div className="flex items-start gap-2 px-4">
-                        <BotAvatar logoIcon={logoIcon} />
+
                         <div className="flex flex-col gap-1">
                             <p className="text-sm md:text-base text-text-secondary font-medium">
                                 Encontrei alguns produtos que podem te interessar:
@@ -241,11 +217,13 @@ export function ChatMessage({ message, onButtonClick, onEdit, logoIcon }: ChatMe
             ) : (
                 <div className="w-full flex justify-start">
                     <div className="flex items-start gap-2 max-w-[90%] md:max-w-[65%]">
-                        <BotAvatar logoIcon={logoIcon} />
-                        <div className="flex flex-col gap-1">
-                            <div className="rounded-[20px] rounded-bl-[4px] px-5 py-4 bg-primary/10 backdrop-blur-xl text-text-primary border border-primary/20 shadow-sm flex flex-col gap-3">
 
+                        <div className="flex flex-col gap-1">
+
+                            <span className='text-[12px] text-text-secondary/50 font-normal ml-1'>Beka Assistent</span>
+                            <div className="rounded-[20px] rounded-bl-[4px] px-5 py-4 bg-primary/10 backdrop-blur-xl text-text-primary  saturate-200 shadow-sm flex flex-col gap-3">
                                 <div className="prose prose-sm md:prose-base dark:prose-invert max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5 text-text-primary leading-relaxed">
+
                                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                         {typeof message.content === 'string'
                                             ? message.content

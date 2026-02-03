@@ -12,6 +12,12 @@ import { Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 // Tipos de status de autenticação
 type AuthStatus = 'idle' | 'pending' | 'needs_data' | 'authenticated' | 'error';
 
+type formData = {
+    nome: string,
+    email: string,
+    phone: string
+} | null
+
 export function ChatWidget() {
     const [isOpen, setIsOpen] = useState(false);
     const [authStatus, setAuthStatus] = useState<AuthStatus>('idle');
@@ -23,16 +29,17 @@ export function ChatWidget() {
     const hasCheckedAuthRef = useRef(false);
 
     // Dados do formulário submetido (para usar junto com shopifyData)
-    const [manualUserData, setManualUserData] = useState<{ nome: string; email: string; phone: string } | null>(null);
+    const [manualUserData, setManualUserData] = useState<formData>(null);
 
     // Contact ID retornado pelo webhook de persistir contato
     const [contactId, setContactId] = useState<number | null>(null);
 
     // Capturar dados da Shopify (sem autoSync para /api/shopify-sync)
-    const { data: shopifyData, error: syncError } = useShopifyData({
-        autoSync: false,
-        preventDuplicateSync: true,
-    });
+    const {
+        data: shopifyData, error: syncError } = useShopifyData({
+            autoSync: false,
+            preventDuplicateSync: true,
+        });
 
     // Aplicar tema baseado na loja da Shopify
     useStoreTheme(shopifyData?.store);
@@ -286,6 +293,7 @@ export function ChatWidget() {
             <Launcher
                 isOpen={isOpen}
                 onClick={() => setIsOpen(!isOpen)}
+                store={shopifyData?.store as 'AGRO' | 'FISHING' | 'MOTORS'}
             />
         </>
     );
