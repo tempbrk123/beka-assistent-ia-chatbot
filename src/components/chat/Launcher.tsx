@@ -52,7 +52,7 @@ export function Launcher({ isOpen, onClick, unreadCount = 0, store = 'AGRO' }: L
                 onClick={onClick}
                 size="icon"
                 className={cn(
-                    "h-15 w-15 border-2 cursor-pointer m-3 rounded-full border-primary/5 shadow-xl transition-all duration-300 hover:scale-110 backdrop-blur-xl backdrop-saturate-200 bg-white/40 hover:bg-white/60 relative overflow-hidden",
+                    "h-15 w-15 border-2 cursor-pointer m-3 rounded-full border-white/30 shadow-xl transition-all duration-300 hover:scale-110 backdrop-blur-xl backdrop-saturate-200 bg-white/70 hover:bg-white/90 relative overflow-hidden",
                     isOpen && "opacity-0 scale-0 pointer-events-none"
                 )}
             >

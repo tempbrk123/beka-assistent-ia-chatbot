@@ -279,13 +279,13 @@ export function ChatWidget() {
         <>
             <div
                 className={cn(
-                    "fixed bottom-20 right-4 z-40 w-[calc(100vw-2rem)] max-w-[400px] h-[calc(100vh-6rem)] max-h-[600px] transition-all duration-300 ease-in-out bg-transparent",
+                    "fixed bottom-28 right-2 left-2 md:left-auto md:right-4 z-40 md:w-[400px] h-[calc(100vh-8rem)] md:h-[calc(100vh-6rem)] max-h-[600px] transition-all duration-300 ease-in-out",
                     isOpen
                         ? "opacity-100 translate-y-0 scale-100 pointer-events-auto"
                         : "opacity-0 translate-y-4 scale-95 pointer-events-none"
                 )}
             >
-                <div className="h-full w-full rounded-4xl shadow-2xl overflow-hidden bg-background/80 backdrop-blur-md">
+                <div className="h-full w-full rounded-3xl md:rounded-4xl shadow-2xl overflow-hidden bg-white/95 backdrop-blur-xl">
                     {renderContent()}
                 </div>
             </div>
