@@ -218,6 +218,7 @@ export function ChatWidget() {
                 return (
                     <UserDataForm
                         onSubmit={handleFormSubmit}
+                        onClose={() => setIsOpen(false)}
                         isLoading={isSubmitting}
                         error={authError}
                         store={shopifyData?.store}
