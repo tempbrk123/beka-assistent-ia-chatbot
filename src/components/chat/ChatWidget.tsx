@@ -7,7 +7,7 @@ import { Launcher } from '@/components/chat/Launcher';
 import { cn } from '@/lib/utils';
 import { useShopifyData, BekaAppData } from '@/hooks/useShopifyData';
 import { useStoreTheme } from '@/hooks/useStoreTheme';
-import { Loader2, AlertCircle, RefreshCw, X } from 'lucide-react';
+import { Loader2, Shirt, RefreshCw, X } from 'lucide-react';
 
 // Tipos de status de autenticação
 type AuthStatus = 'idle' | 'pending' | 'needs_data' | 'authenticated' | 'error';
@@ -238,25 +238,24 @@ export function ChatWidget() {
                             <X className="w-5 h-5 text-text-secondary" />
                         </button>
                         <div className="relative w-20 h-20">
-                            <div className="absolute inset-0 bg-linear-to-tr from-red-400 to-orange-400 rounded-full blur-xl opacity-60 animate-pulse" />
-                            <div className="absolute inset-2 bg-surface-white/80 backdrop-blur-sm rounded-full flex items-center justify-center">
-                                <AlertCircle className="w-8 h-8 text-red-500" />
+                            <div className="absolute inset-0 bg-linear-to-tr from-accent-mint/20 to-accent-lime/20 rounded-full blur-xl opacity-80 animate-pulse" />
+                            <div className="absolute inset-2 bg-accent-mint/12 backdrop-blur-sm rounded-full flex items-center justify-center">
+                                <Shirt className="w-8 h-8 text-accent-mint" />
                             </div>
                         </div>
                         <div className="text-center">
                             <h3 className="text-lg font-semibold text-text-primary mb-2">
-                                Ops! Algo deu errado
+                                Ops!
                             </h3>
                             <p className="text-text-secondary text-sm max-w-xs">
-                                {authError || 'Não foi possível conectar ao serviço.'}
+                                Estamos com alta demanda. Confira nossos produtos enquanto aguarda:
                             </p>
                         </div>
                         <button
-                            onClick={handleRetry}
+                            onClick={() => setIsOpen(false)}
                             className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-linear-to-r from-accent-mint to-accent-lime text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5"
                         >
-                            <RefreshCw className="w-4 h-4" />
-                            Tentar Novamente
+                            Explorar loja
                         </button>
                     </div>
                 );
