@@ -24,13 +24,12 @@
     iframe.style.zIndex = "999999";
 
     // Initial Size (Launcher Button only)
-    // Launcher is bottom-4 right-4, size 14 (56px) + shadow/hover space
-    // We give it enough space to avoid clipping
-    iframe.style.width = "100px";
-    iframe.style.height = "100px";
+    // Launcher button is ~60px with margins, needs space for pulse effect
+    iframe.style.width = "120px";
+    iframe.style.height = "120px";
     iframe.style.transition = "width 0.3s ease, height 0.3s ease";
     iframe.style.backgroundColor = "transparent";
-    iframe.style.pointerEvents = "auto"; // Initially allow clicks on launcher
+    iframe.style.pointerEvents = "auto"; // Allow clicks on launcher
 
     document.body.appendChild(iframe);
 
@@ -82,8 +81,8 @@
             iframe.style.transform = "";
         } else if (event.data === "BEKA_WIDGET_CLOSE") {
             // Shrink back to launcher button size
-            iframe.style.width = "100px";
-            iframe.style.height = "100px";
+            iframe.style.width = "120px";
+            iframe.style.height = "120px";
             iframe.style.pointerEvents = "auto"; // Keep launcher clickable
             iframe.style.transform = "";
         } else if (event.data === "BEKA_REQUEST_SHOPIFY_DATA") {

@@ -41,7 +41,7 @@ export function Launcher({ isOpen, onClick, unreadCount = 0, store = 'AGRO' }: L
     const logoSrc = storeLogos[store] || storeLogos['AGRO'];
 
     return (
-        <div className="fixed bottom-0 mb-10 mr-10 right-4 z-50 flex flex-col items-end gap-2">
+        <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-2">
             {/* Efeito de pulse no fundo */}
             {!isOpen && (
                 <div className="absolute inset-0 rounded-full bg-primary/30 animate-ping" style={{ animationDuration: '1s' }} />
