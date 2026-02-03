@@ -4,7 +4,6 @@
  */
 (function () {
     // Configuration
-    // Auto-detect URL from the script tag itself to avoid manual configuration
     var script = document.currentScript;
     var scriptUrl = new URL(script.src);
     var WIDGET_URL = scriptUrl.origin;
@@ -12,6 +11,9 @@
 
     // Prevent duplicate injection
     if (document.getElementById(IFRAME_ID)) return;
+
+    // Detect mobile
+    var isMobile = window.innerWidth <= 600;
 
     // Create Iframe
     var iframe = document.createElement("iframe");
@@ -22,15 +24,12 @@
     iframe.style.right = "0";
     iframe.style.border = "none";
     iframe.style.zIndex = "999999";
-    iframe.style.bottom = "80px"; // Above mobile nav bar
+    iframe.style.backgroundColor = "transparent";
+    iframe.style.transition = "width 0.3s ease, height 0.3s ease";
 
     // Initial Size (Launcher Button only)
-    // Launcher button is ~60px with margins, needs space for pulse effect
-    iframe.style.width = "120px";
-    iframe.style.height = "120px";
-    iframe.style.transition = "width 0.3s ease, height 0.3s ease";
-    iframe.style.backgroundColor = "transparent";
-    iframe.style.pointerEvents = "auto"; // Allow clicks on launcher
+    iframe.style.width = "100px";
+    iframe.style.height = "100px";
 
     document.body.appendChild(iframe);
 
@@ -49,10 +48,8 @@
 
     // Quando o iframe carregar, enviar os dados da Shopify
     iframe.onload = function () {
-        // Tentar enviar imediatamente
         sendShopifyDataToWidget();
 
-        // Se BekaAppData ainda não existir, tentar novamente algumas vezes
         var attempts = 0;
         var maxAttempts = 10;
         var interval = setInterval(function () {
@@ -69,25 +66,27 @@
 
     // Handle Messages from Widget (Open/Close)
     window.addEventListener("message", function (event) {
-        // Security check: ensure message comes from our widget
         if (event.origin !== WIDGET_URL) return;
 
+        var currentIsMobile = window.innerWidth <= 600;
+
         if (event.data === "BEKA_WIDGET_OPEN") {
-            // Expand to full widget size
-            // Widget is max 400px width + margins, 600px height + margins
-            // We reserve slightly more space
-            iframe.style.width = "450px";
-            iframe.style.height = "650px";
-            iframe.style.pointerEvents = "auto"; // Allow interaction with chat
-            iframe.style.transform = "";
+            if (currentIsMobile) {
+                // Mobile: full screen
+                iframe.style.width = "100%";
+                iframe.style.height = "100%";
+                iframe.style.bottom = "0";
+                iframe.style.right = "0";
+            } else {
+                // Desktop: fixed size
+                iframe.style.width = "420px";
+                iframe.style.height = "620px";
+            }
         } else if (event.data === "BEKA_WIDGET_CLOSE") {
-            // Shrink back to launcher button size
-            iframe.style.width = "120px";
-            iframe.style.height = "120px";
-            iframe.style.pointerEvents = "auto"; // Keep launcher clickable
-            iframe.style.transform = "";
+            // Back to launcher size
+            iframe.style.width = "100px";
+            iframe.style.height = "100px";
         } else if (event.data === "BEKA_REQUEST_SHOPIFY_DATA") {
-            // Widget is requesting the Shopify data
             sendShopifyDataToWidget();
         }
     });
