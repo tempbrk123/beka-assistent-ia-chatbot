@@ -1,18 +1,19 @@
 'use client';
 
 import { useState } from 'react';
-import { Loader2, User, Mail, Phone, AlertCircle } from 'lucide-react';
+import { Loader2, User, Mail, Phone, AlertCircle, X } from 'lucide-react';
 import { useStoreLogo } from '@/hooks/useStoreLogo';
 import { StoreType } from '@/hooks/useShopifyData';
 
 interface UserDataFormProps {
     onSubmit: (data: { nome: string; email: string; phone: string }) => Promise<void>;
+    onClose?: () => void;
     isLoading?: boolean;
     error?: string | null;
     store?: StoreType;
 }
 
-export function UserDataForm({ onSubmit, isLoading = false, error, store }: UserDataFormProps) {
+export function UserDataForm({ onSubmit, onClose, isLoading = false, error, store }: UserDataFormProps) {
     const [nome, setNome] = useState('');
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
@@ -68,6 +69,17 @@ export function UserDataForm({ onSubmit, isLoading = false, error, store }: User
 
     return (
         <div className="flex flex-col items-center justify-center h-full px-6 py-8 relative z-10">
+
+            {/* Close Button */}
+            {onClose && (
+                <button
+                    onClick={onClose}
+                    className="absolute top-4 right-4 p-2 rounded-full bg-surface-white/60 backdrop-blur-sm border border-black/10 text-text-secondary hover:text-text-primary hover:bg-surface-white transition-all duration-200 cursor-pointer"
+                    aria-label="Fechar chat"
+                >
+                    <X className="h-5 w-5" />
+                </button>
+            )}
 
             {/* Header / Logo 
         Refatorado: Removemos divs aninhadas desnecessárias e posições absolutas.
