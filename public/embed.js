@@ -28,8 +28,8 @@
     iframe.style.transition = "width 0.3s ease, height 0.3s ease";
 
     // Initial Size (Launcher Button only)
-    iframe.style.width = "100px";
-    iframe.style.height = "100px";
+    iframe.style.width = "150px";
+    iframe.style.height = "150px";
 
     document.body.appendChild(iframe);
 
@@ -84,8 +84,8 @@
             }
         } else if (event.data === "BEKA_WIDGET_CLOSE") {
             // Back to launcher size
-            iframe.style.width = "100px";
-            iframe.style.height = "100px";
+            iframe.style.width = "150px";
+            iframe.style.height = "150px";
         } else if (event.data === "BEKA_REQUEST_SHOPIFY_DATA") {
             sendShopifyDataToWidget();
         }
