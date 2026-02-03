@@ -7,7 +7,7 @@ import { Launcher } from '@/components/chat/Launcher';
 import { cn } from '@/lib/utils';
 import { useShopifyData, BekaAppData } from '@/hooks/useShopifyData';
 import { useStoreTheme } from '@/hooks/useStoreTheme';
-import { Loader2, AlertCircle, RefreshCw } from 'lucide-react';
+import { Loader2, AlertCircle, RefreshCw, X } from 'lucide-react';
 
 // Tipos de status de autenticação
 type AuthStatus = 'idle' | 'pending' | 'needs_data' | 'authenticated' | 'error';
@@ -228,7 +228,15 @@ export function ChatWidget() {
             case 'error':
                 // Estado de erro
                 return (
-                    <div className="flex flex-col items-center justify-center h-full px-6 gap-6">
+                    <div className="relative flex flex-col items-center justify-center h-full px-6 gap-6">
+                        {/* Botão Fechar */}
+                        <button
+                            onClick={() => setIsOpen(false)}
+                            className="absolute top-4 right-4 p-2 rounded-full bg-surface-white/80 hover:bg-gray-100 transition-colors shadow-md"
+                            aria-label="Fechar"
+                        >
+                            <X className="w-5 h-5 text-text-secondary" />
+                        </button>
                         <div className="relative w-20 h-20">
                             <div className="absolute inset-0 bg-linear-to-tr from-red-400 to-orange-400 rounded-full blur-xl opacity-60 animate-pulse" />
                             <div className="absolute inset-2 bg-surface-white/80 backdrop-blur-sm rounded-full flex items-center justify-center">
