@@ -280,8 +280,8 @@ export function ChatWidget() {
         <>
             <div
                 className={cn(
-                    //Danado do bottom
-                    "fixed bottom-0 right-2 left-2 md:left-auto md:right-4 z-40 md:w-[400px] h-[calc(100vh-8rem)] md:h-[calc(100vh-6rem)] max-h-[600px] transition-all duration-300 ease-in-out",
+                    // Chat container - positioned above mobile nav bar
+                    "fixed bottom-24 right-2 left-2 md:bottom-4 md:left-auto md:right-4 z-40 md:w-[400px] h-[calc(100vh-10rem)] md:h-[calc(100vh-6rem)] max-h-[600px] transition-all duration-300 ease-in-out",
                     isOpen
                         ? "opacity-100 translate-y-0 scale-100 pointer-events-auto"
                         : "opacity-0 translate-y-4 scale-95 pointer-events-none"

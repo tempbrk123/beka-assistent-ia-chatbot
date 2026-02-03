@@ -22,6 +22,7 @@
     iframe.style.right = "0";
     iframe.style.border = "none";
     iframe.style.zIndex = "999999";
+    iframe.style.bottom = "80px"; // Above mobile nav bar
 
     // Initial Size (Launcher Button only)
     // Launcher button is ~60px with margins, needs space for pulse effect
